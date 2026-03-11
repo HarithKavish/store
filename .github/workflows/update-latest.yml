@@ -35,12 +35,19 @@ jobs:
           VERSION=$(echo "$FILENAME" | sed 's/^jarvis-v//;s/\.apk$//')
           APK_URL="https://store.harithkavish.com/apps/jarvis/mobile/android/${FILENAME}"
 
-          # Use the most recent commit message that touched the android folder
-          COMMIT_MSG=$(git log -1 --pretty=%s -- "$TARGET" | head -1)
-          # Strip any [skip ci] tags and limit length
-          COMMIT_MSG=$(echo "$COMMIT_MSG" | sed 's/\[skip ci\]//g;s/\[no ci\]//g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | cut -c1-120)
-          if [ -z "$COMMIT_MSG" ] || echo "$COMMIT_MSG" | grep -qi "^release:"; then
-            COMMIT_MSG="Bug fixes and improvements"
+          # Prefer release notes from the my_chatgpt repo release if available
+          COMMIT_MSG=""
+          if command -v curl >/dev/null 2>&1; then
+            RELEASE_JSON=$(curl -s "https://api.github.com/repos/HarithKavish/my_chatgpt/releases/tags/v${VERSION}" || true)
+            COMMIT_MSG=$(echo "$RELEASE_JSON" | jq -r '.body // empty' 2>/dev/null || true)
+          fi
+          # Fallback to most recent commit subject touching the android folder
+          if [ -z "$COMMIT_MSG" ]; then
+            COMMIT_MSG=$(git log -1 --pretty=%s -- "$TARGET" | head -1)
+            COMMIT_MSG=$(echo "$COMMIT_MSG" | sed 's/\[skip ci\]//g;s/\[no ci\]//g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | cut -c1-120)
+            if [ -z "$COMMIT_MSG" ]; then
+              COMMIT_MSG="Bug fixes and improvements"
+            fi
           fi
 
           echo "Version:  $VERSION"
