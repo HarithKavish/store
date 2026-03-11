@@ -1,0 +1,68 @@
+name: Update latest.json
+
+on:
+  push:
+    paths:
+      - "apps/jarvis/mobile/android/jarvis-v*.apk"
+  workflow_dispatch:
+
+jobs:
+  update-manifest:
+    name: Update Jarvis latest.json
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 5
+
+      - name: Resolve latest version and update latest.json
+        run: |
+          TARGET="apps/jarvis/mobile/android"
+
+          # Find the highest versioned APK using sort --version-sort
+          LATEST_APK=$(ls "$TARGET"/jarvis-v*.apk 2>/dev/null | sort --version-sort | tail -1)
+
+          if [ -z "$LATEST_APK" ]; then
+            echo "No versioned APK found — skipping"
+            exit 0
+          fi
+
+          FILENAME=$(basename "$LATEST_APK")
+          VERSION=$(echo "$FILENAME" | sed 's/^jarvis-v//;s/\.apk$//')
+          APK_URL="https://store.harithkavish.com/apps/jarvis/mobile/android/${FILENAME}"
+
+          # Use the most recent commit message that touched the android folder
+          COMMIT_MSG=$(git log -1 --pretty=%s -- "$TARGET" | head -1)
+          # Strip any [skip ci] tags and limit length
+          COMMIT_MSG=$(echo "$COMMIT_MSG" | sed 's/\[skip ci\]//g;s/\[no ci\]//g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | cut -c1-120)
+          if [ -z "$COMMIT_MSG" ] || echo "$COMMIT_MSG" | grep -qi "^release:"; then
+            COMMIT_MSG="Bug fixes and improvements"
+          fi
+
+          echo "Version:  $VERSION"
+          echo "APK URL:  $APK_URL"
+          echo "Notes:    $COMMIT_MSG"
+
+          jq -n \
+            --arg version  "$VERSION" \
+            --arg apk_url  "$APK_URL" \
+            --arg notes    "$COMMIT_MSG" \
+            '{version: $version, apk_url: $apk_url, release_notes: $notes}' \
+            > "$TARGET/latest.json"
+
+          echo "=== latest.json ==="
+          cat "$TARGET/latest.json"
+
+      - name: Commit updated latest.json
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add apps/jarvis/mobile/android/latest.json
+          git diff --staged --quiet \
+            && echo "Nothing to commit" \
+            || git commit -m "chore: update latest.json [skip ci]"
+          git push

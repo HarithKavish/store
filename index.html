@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Harith's Store — Apps by HarithKavish</title>
+  <meta name="description" content="Download Jarvis, your personal AI assistant for Android." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #131318;
+      --surface2: #1c1c24;
+      --border: #2a2a38;
+      --accent: #6c63ff;
+      --accent-glow: rgba(108, 99, 255, 0.25);
+      --text: #e8e8f0;
+      --muted: #8888a8;
+      --success: #22c55e;
+      --radius: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-brand { font-weight: 700; font-size: 1.1rem; letter-spacing: 0.04em; color: var(--text); text-decoration: none; }
+    .nav-brand span { color: var(--accent); }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 80px 2rem 60px;
+      text-align: center;
+      background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(108,99,255,0.18), transparent);
+    }
+    .app-icon {
+      width: 100px; height: 100px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #6c63ff 0%, #3b37d4 100%);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+      box-shadow: 0 12px 40px var(--accent-glow);
+      font-size: 2.6rem;
+    }
+    .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; letter-spacing: -0.02em; }
+    .hero p.tagline { font-size: 1.15rem; color: var(--muted); margin: 10px 0 32px; }
+
+    .badge-row {
+      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .badge {
+      padding: 4px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 600;
+      border: 1px solid var(--border);
+    }
+    .badge.version { background: var(--surface2); color: var(--accent); border-color: var(--accent); }
+    .badge.android { background: var(--surface2); color: var(--success); border-color: var(--success); }
+
+    .download-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent);
+      color: #fff; font-weight: 700; font-size: 1rem;
+      padding: 14px 32px; border-radius: 999px;
+      text-decoration: none;
+      box-shadow: 0 6px 30px var(--accent-glow);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .download-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 40px var(--accent-glow); }
+    .download-btn svg { width: 20px; height: 20px; fill: #fff; flex-shrink: 0; }
+
+    .release-note {
+      margin-top: 16px; font-size: 0.85rem; color: var(--muted);
+    }
+
+    /* ── Apps Grid ── */
+    .section { padding: 64px 2rem; max-width: 1000px; margin: 0 auto; }
+    .section h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
+    .section p.sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+
+    .apps-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+    }
+
+    .app-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .app-card:hover { border-color: var(--accent); box-shadow: 0 4px 24px var(--accent-glow); }
+
+    .card-icon {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #6c63ff, #3b37d4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; margin-bottom: 16px;
+    }
+    .card-name { font-weight: 700; font-size: 1.05rem; }
+    .card-desc { color: var(--muted); font-size: 0.87rem; margin: 6px 0 16px; }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .card-version { font-size: 0.78rem; color: var(--muted); }
+    .card-dl {
+      font-size: 0.82rem; font-weight: 600; color: var(--accent);
+      text-decoration: none; padding: 6px 14px;
+      border: 1px solid var(--accent); border-radius: 999px;
+      transition: background .15s, color .15s;
+    }
+    .card-dl:hover { background: var(--accent); color: #fff; }
+
+    /* ── Features ── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;
+    }
+    .feat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .feat-icon { font-size: 1.8rem; margin-bottom: 10px; }
+    .feat h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .feat p { font-size: 0.83rem; color: var(--muted); }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center; padding: 32px 2rem;
+      color: var(--muted); font-size: 0.85rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* Loading state */
+    .loading { opacity: 0.5; font-style: italic; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/"><span>H</span>arith's Store</a>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="app-icon">🤖</div>
+  <h1>Jarvis</h1>
+  <p class="tagline">Your personal AI assistant — always in your pocket.</p>
+
+  <div class="badge-row">
+    <span class="badge version" id="hero-version">Loading…</span>
+    <span class="badge android">Android APK</span>
+  </div>
+
+  <a class="download-btn" id="hero-download" href="apps/jarvis/mobile/android/jarvis-latest.apk" download>
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 15.5l-5-5h3V4h4v6.5h3l-5 5zm-7 3h14v2H5v-2z"/>
+    </svg>
+    Download APK
+  </a>
+  <p class="release-note" id="hero-release-note"></p>
+</section>
+
+<!-- ── All Apps ── -->
+<div class="section">
+  <h2>All Apps</h2>
+  <p class="sub">Sideload Android apps directly — no Play Store required.</p>
+
+  <div class="apps-grid">
+    <div class="app-card">
+      <div class="card-icon">🤖</div>
+      <div class="card-name">Jarvis</div>
+      <div class="card-desc">AI-powered chat assistant with memory, tool use, and hosted content management.</div>
+      <div class="card-footer">
+        <span class="card-version" id="card-version">v—</span>
+        <a class="card-dl" id="card-dl" href="apps/jarvis/mobile/android/jarvis-latest.apk" download>Download</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Features ── -->
+<div class="section">
+  <h2>Why Jarvis?</h2>
+  <p class="sub">Built to be smart, fast, and private.</p>
+
+  <div class="features-grid">
+    <div class="feat">
+      <div class="feat-icon">🧠</div>
+      <h3>Persistent Memory</h3>
+      <p>Remembers context across sessions so you never have to repeat yourself.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🔧</div>
+      <h3>Tool Use</h3>
+      <p>Searches the web, reads files, and runs actions — not just a chatbot.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🌐</div>
+      <h3>Hosted Sites & Blogs</h3>
+      <p>Create, edit, and manage personal websites and blogs via conversation.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🔒</div>
+      <h3>Private by Default</h3>
+      <p>Your data stays in your own cloud — no third-party storage.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">⚡</div>
+      <h3>Always Up to Date</h3>
+      <p>Auto-built releases mean you always get the latest version instantly.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🤝</div>
+      <h3>Open Source</h3>
+      <p>Fully open-source and self-hostable if you want full control.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── How to Install ── -->
+<div class="section">
+  <h2>How to Install</h2>
+  <p class="sub">Sideloading takes under a minute.</p>
+
+  <div class="features-grid">
+    <div class="feat">
+      <div class="feat-icon">1️⃣</div>
+      <h3>Download the APK</h3>
+      <p>Tap the Download button above on your Android device.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">2️⃣</div>
+      <h3>Allow Unknown Sources</h3>
+      <p>Go to Settings → Apps → Special Access → Install Unknown Apps, then allow your browser.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">3️⃣</div>
+      <h3>Install</h3>
+      <p>Open the downloaded APK from your notification tray or Downloads folder and tap Install.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">4️⃣</div>
+      <h3>Launch & Sign In</h3>
+      <p>Open Jarvis, sign in with your account, and start chatting.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Built with ❤️ by <a href="https://harithkavish.com" target="_blank">Harith Kavish</a> ·
+  <a href="https://github.com/HarithKavish/my_chatgpt" target="_blank">Source</a>
+</footer>
+
+<script>
+  (async () => {
+    try {
+      const res = await fetch('apps/jarvis/mobile/android/latest.json?t=' + Date.now());
+      if (!res.ok) return;
+      const data = await res.json();
+      const v = data.version || '—';
+      const url = data.apk_url || 'apps/jarvis/mobile/android/jarvis-latest.apk';
+      const notes = data.release_notes || '';
+
+      document.getElementById('hero-version').textContent = 'v' + v;
+      document.getElementById('card-version').textContent = 'v' + v;
+      document.getElementById('hero-download').href = url;
+      document.getElementById('card-dl').href = url;
+
+      if (notes && notes !== 'Initial release placeholder') {
+        document.getElementById('hero-release-note').textContent = '✦ ' + notes;
+      }
+    } catch (_) {}
+  })();
+</script>
+</body>
+</html>
