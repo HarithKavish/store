@@ -3,6 +3,12 @@
  * follow harithkavish.com without redefining a single colour here.
  */
 
+/* The store mark carries more detail than the shared 2.6rem allows for. */
+.brand__mark {
+    width: 3rem;
+    height: 3rem;
+}
+
 .store-loading,
 .store-empty {
     color: var(--muted);
