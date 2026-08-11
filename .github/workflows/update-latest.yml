@@ -1,14 +1,14 @@
-name: Update latest.json
+name: Update app manifests
 
 on:
   push:
     paths:
-      - "apps/jarvis/mobile/android/jarvis-v*.apk"
+      - "apps/**/*.apk"
   workflow_dispatch:
 
 jobs:
-  update-manifest:
-    name: Update Jarvis latest.json
+  update-manifests:
+    name: Refresh latest.json for every app
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -17,59 +17,79 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 5
+          fetch-depth: 0
 
-      - name: Resolve latest version and update latest.json
+      - name: Resolve latest build per app
         run: |
-          TARGET="apps/jarvis/mobile/android"
+          set -euo pipefail
+          CATALOG="catalog.json"
 
-          # Find the highest versioned APK using sort --version-sort
-          LATEST_APK=$(ls "$TARGET"/jarvis-v*.apk 2>/dev/null | sort --version-sort | tail -1)
+          # One pass per app folder, so a new app only needs its own directory.
+          for DIR in apps/*/mobile/android; do
+            [ -d "$DIR" ] || continue
 
-          if [ -z "$LATEST_APK" ]; then
-            echo "No versioned APK found — skipping"
-            exit 0
-          fi
+            SLUG=$(echo "$DIR" | cut -d/ -f2)
 
-          FILENAME=$(basename "$LATEST_APK")
-          VERSION=$(echo "$FILENAME" | sed 's/^jarvis-v//;s/\.apk$//')
-          APK_URL="https://store.harithkavish.com/apps/jarvis/mobile/android/${FILENAME}"
-
-          # Prefer release notes from the my_chatgpt repo release if available
-          COMMIT_MSG=""
-          if command -v curl >/dev/null 2>&1; then
-            RELEASE_JSON=$(curl -s "https://api.github.com/repos/HarithKavish/my_chatgpt/releases/tags/v${VERSION}" || true)
-            COMMIT_MSG=$(echo "$RELEASE_JSON" | jq -r '.body // empty' 2>/dev/null || true)
-          fi
-          # Fallback to most recent commit subject touching the android folder
-          if [ -z "$COMMIT_MSG" ]; then
-            COMMIT_MSG=$(git log -1 --pretty=%s -- "$TARGET" | head -1)
-            COMMIT_MSG=$(echo "$COMMIT_MSG" | sed 's/\[skip ci\]//g;s/\[no ci\]//g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | cut -c1-120)
-            if [ -z "$COMMIT_MSG" ]; then
-              COMMIT_MSG="Bug fixes and improvements"
+            LATEST_APK=$(ls "$DIR"/*-v*.apk 2>/dev/null | sort --version-sort | tail -1 || true)
+            if [ -z "$LATEST_APK" ]; then
+              echo "$SLUG: no versioned APK — skipping"
+              continue
             fi
-          fi
 
-          echo "Version:  $VERSION"
-          echo "APK URL:  $APK_URL"
-          echo "Notes:    $COMMIT_MSG"
+            FILENAME=$(basename "$LATEST_APK")
+            VERSION=$(echo "$FILENAME" | sed 's/.*-v//;s/\.apk$//')
+            URL="https://store.harithkavish.com/${DIR}/${FILENAME}"
+            SIZE=$(stat -c %s "$LATEST_APK")
+            RELEASED=$(git log -1 --format=%cI -- "$LATEST_APK")
+            [ -n "$RELEASED" ] || RELEASED=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-          jq -n \
-            --arg version  "$VERSION" \
-            --arg apk_url  "$APK_URL" \
-            --arg notes    "$COMMIT_MSG" \
-            '{version: $version, apk_url: $apk_url, release_notes: $notes}' \
-            > "$TARGET/latest.json"
+            # Prefer the release body from the app's source repo when the
+            # catalog names one; fall back to the commit that shipped the build.
+            NOTES=""
+            REPO=""
+            if [ -f "$CATALOG" ]; then
+              REPO=$(jq -r --arg slug "$SLUG" '.apps[] | select(.slug == $slug) | .release_repo // empty' "$CATALOG")
+            fi
+            if [ -n "$REPO" ]; then
+              NOTES=$(curl -s "https://api.github.com/repos/${REPO}/releases/tags/v${VERSION}" | jq -r '.body // empty')
+            fi
+            if [ -z "$NOTES" ]; then
+              NOTES=$(git log -1 --pretty=%s -- "$DIR" \
+                | sed 's/\[skip ci\]//g;s/\[no ci\]//g' \
+                | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+                | cut -c1-160)
+            fi
+            [ -n "$NOTES" ] || NOTES="Bug fixes and improvements"
 
-          echo "=== latest.json ==="
-          cat "$TARGET/latest.json"
+            echo "$SLUG: v$VERSION ($FILENAME, $SIZE bytes)"
 
-      - name: Commit updated latest.json
+            # apk_url stays alongside url: the Jarvis in-app updater reads it.
+            jq -n \
+              --arg version  "$VERSION" \
+              --arg url      "$URL" \
+              --arg filename "$FILENAME" \
+              --arg released "$RELEASED" \
+              --arg notes    "$NOTES" \
+              --argjson size "$SIZE" \
+              '{
+                 version: $version,
+                 apk_url: $url,
+                 url: $url,
+                 filename: $filename,
+                 size_bytes: $size,
+                 released_at: $released,
+                 release_notes: $notes
+               }' > "$DIR/latest.json"
+
+            cat "$DIR/latest.json"
+          done
+
+      - name: Commit refreshed manifests
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add apps/jarvis/mobile/android/latest.json
+          git add apps/*/mobile/android/latest.json
           git diff --staged --quiet \
             && echo "Nothing to commit" \
-            || git commit -m "chore: update latest.json [skip ci]"
+            || git commit -m "chore: update app manifests [skip ci]"
           git push

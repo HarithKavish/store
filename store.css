@@ -1,0 +1,563 @@
+/*
+ * Store-only components, built from the shared theme's tokens so light and dark
+ * follow harithkavish.com without redefining a single colour here.
+ */
+
+.store-loading,
+.store-empty {
+    color: var(--muted);
+}
+
+.store-empty {
+    margin: 0;
+    padding: 2.5rem 1.25rem;
+    text-align: center;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 1.4rem;
+}
+
+/* ── Toolbar: search and filters, the way a store front sorts itself ── */
+
+.store-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0 1.75rem;
+}
+
+.store-search {
+    position: relative;
+    flex: 1 1 18rem;
+    min-width: 0;
+}
+
+/* The magnifier is drawn from borders, so no icon file has to load for it. */
+.store-search::before {
+    content: '';
+    position: absolute;
+    left: 1.05rem;
+    top: 50%;
+    width: 0.72rem;
+    height: 0.72rem;
+    margin-top: -0.5rem;
+    border: 2px solid var(--muted);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.store-search::after {
+    content: '';
+    position: absolute;
+    left: 1.72rem;
+    top: 50%;
+    width: 0.42rem;
+    height: 2px;
+    margin-top: 0.22rem;
+    background: var(--muted);
+    border-radius: 999px;
+    transform: rotate(45deg);
+    transform-origin: left center;
+    pointer-events: none;
+}
+
+.store-search__input {
+    width: 100%;
+    padding: 0.72rem 1rem 0.72rem 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.95rem;
+    box-shadow: var(--shadow);
+}
+
+.store-search__input::placeholder {
+    color: var(--muted);
+}
+
+.store-search__input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.store-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.chip {
+    padding: 0.5rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface-soft);
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.chip:hover {
+    color: var(--text);
+    transform: translateY(-1px);
+}
+
+.chip.is-active {
+    background: var(--accent);
+    border-color: transparent;
+    color: var(--surface-strong);
+}
+
+/* ── Spotlight: the one app the store leads with ── */
+
+.spotlight {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    align-items: center;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+    background:
+        radial-gradient(circle at 22% 30%, color-mix(in srgb, var(--app-accent, var(--accent)) 20%, transparent), transparent 62%),
+        var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1.75rem;
+    box-shadow: var(--shadow-strong);
+}
+
+.spotlight__art {
+    display: flex;
+    justify-content: center;
+}
+
+.spotlight__art .app-icon {
+    width: min(100%, 13rem);
+}
+
+.spotlight__eyebrow {
+    margin: 0 0 0.6rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+}
+
+.spotlight__title {
+    margin: 0;
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+}
+
+.spotlight__lead {
+    margin: 0.7rem 0 0;
+    max-width: 46ch;
+    color: var(--muted);
+}
+
+.spotlight__actions,
+.detail-head__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.35rem;
+}
+
+/* ── App icons: one square mark, three sizes ── */
+
+.app-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    border-radius: 1.4rem;
+    box-shadow: var(--shadow);
+}
+
+.app-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Apps that ship no artwork still read as a tile, using their initial. */
+.app-icon__monogram {
+    font-size: 42%;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    color: var(--accent);
+}
+
+/* ── Catalog grid ── */
+
+.app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+    gap: 1rem;
+}
+
+.app-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 1.15rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1.4rem;
+    box-shadow: var(--shadow);
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.app-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+    box-shadow: var(--shadow-strong);
+}
+
+.app-card .app-icon {
+    width: 4.5rem;
+}
+
+.app-card__title {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+}
+
+/* Stretched so the whole card opens the app, with one link in the markup. */
+.app-card__title::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+}
+
+.app-card__publisher,
+.app-card__meta {
+    margin: 0.15rem 0 0;
+    color: var(--muted);
+    font-size: 0.86rem;
+}
+
+.app-card__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.app-card__foot {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+}
+
+.app-card__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.app-card__get {
+    padding: 0.55rem 1.25rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* The store is meant to grow, so the grid says so instead of ending flat. */
+.app-card--placeholder {
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    text-align: center;
+    background: transparent;
+    border-style: dashed;
+    box-shadow: none;
+}
+
+.app-card--placeholder:hover {
+    transform: none;
+    border-color: var(--border);
+    box-shadow: none;
+}
+
+.app-card--placeholder p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+.app-card--placeholder strong {
+    font-size: 1rem;
+    font-weight: 650;
+    color: var(--text);
+}
+
+/* ── App detail ── */
+
+.store-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+    color: var(--muted);
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.store-back:hover {
+    color: var(--text);
+}
+
+.detail-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(1.1rem, 3vw, 2rem);
+    padding: clamp(1.25rem, 3vw, 2rem);
+    background:
+        radial-gradient(circle at 8% 12%, color-mix(in srgb, var(--app-accent, var(--accent)) 18%, transparent), transparent 55%),
+        var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1.75rem;
+    box-shadow: var(--shadow);
+}
+
+.detail-head .app-icon {
+    width: clamp(5.5rem, 14vw, 8.5rem);
+}
+
+.detail-head__eyebrow {
+    margin: 0 0 0.5rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.detail-head__title {
+    margin: 0;
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+}
+
+.detail-head__lead {
+    margin: 0.6rem 0 0;
+    max-width: 58ch;
+    color: var(--muted);
+}
+
+.detail-head__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.9rem;
+}
+
+.detail-note {
+    margin: 0.85rem 0 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(17rem, 0.85fr);
+    align-items: start;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.detail-column {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.detail-panel {
+    padding: 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1.4rem;
+    box-shadow: var(--shadow);
+}
+
+.detail-panel__title {
+    margin: 0 0 0.85rem;
+    font-size: 1.05rem;
+    font-weight: 650;
+}
+
+.detail-panel p {
+    margin: 0;
+    color: var(--muted);
+}
+
+/* Release notes arrive as written, so their own line breaks are kept. */
+.release-notes {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.feature-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.feature-list__title {
+    display: block;
+    font-weight: 650;
+    font-size: 0.95rem;
+}
+
+.feature-list__detail {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+.step-list {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+}
+
+.step-list li {
+    position: relative;
+    padding-left: 2.4rem;
+    color: var(--muted);
+    counter-increment: step;
+}
+
+.step-list li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: -0.05rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    background: var(--pill-bg);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--accent);
+    font-size: 0.82rem;
+    font-weight: 650;
+}
+
+.info-list {
+    display: grid;
+    gap: 0.7rem;
+    margin: 0;
+}
+
+.info-list > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.info-list > div:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.info-list dt {
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+.info-list dd {
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.link-list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.link-list a {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.92rem;
+}
+
+.link-list a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 1040px) {
+    .detail-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 760px) {
+    .spotlight {
+        grid-template-columns: minmax(0, 1fr);
+        text-align: center;
+    }
+
+    .spotlight__lead {
+        margin-inline: auto;
+    }
+
+    .spotlight__actions {
+        justify-content: center;
+    }
+
+    .spotlight__art {
+        order: -1;
+    }
+
+    .spotlight__art .app-icon {
+        width: min(60%, 9rem);
+    }
+
+    .detail-head {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: start;
+    }
+}
+
+@media (max-width: 520px) {
+    .store-filters {
+        width: 100%;
+    }
+
+    .app-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .detail-head__actions .button,
+    .spotlight__actions .button {
+        width: 100%;
+    }
+}

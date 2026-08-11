@@ -1,0 +1,66 @@
+{
+  "store": {
+    "name": "Store",
+    "publisher": "Harith Kavish",
+    "lead": "Every app built on the Harith Kavish ecosystem, packaged and ready to install."
+  },
+  "apps": [
+    {
+      "slug": "jarvis",
+      "name": "Jarvis",
+      "publisher": "Harith Kavish",
+      "tagline": "Your personal AI assistant — always in your pocket.",
+      "category": "Productivity",
+      "price": "Free",
+      "status": "Live",
+      "featured": true,
+      "icon": "apps/jarvis/icon.png",
+      "accent": "#3aa8ff",
+      "description": "Jarvis is a personal AI assistant that remembers your context, uses real tools instead of guessing, and manages your hosted sites and blogs through plain conversation. It runs against your own cloud, so your history stays yours.",
+      "features": [
+        {
+          "title": "Persistent memory",
+          "detail": "Remembers context across sessions so you never have to repeat yourself."
+        },
+        {
+          "title": "Real tool use",
+          "detail": "Searches the web, reads files, and runs actions — not just a chatbot."
+        },
+        {
+          "title": "Hosted sites & blogs",
+          "detail": "Create, edit, and publish personal sites and blogs through conversation."
+        },
+        {
+          "title": "Private by default",
+          "detail": "Your data stays in your own cloud, with no third-party storage in between."
+        },
+        {
+          "title": "In-app updates",
+          "detail": "Checks this store on launch and installs new builds without a visit to the browser."
+        },
+        {
+          "title": "Open source",
+          "detail": "The full stack is public and self-hostable if you want to run your own."
+        }
+      ],
+      "links": [
+        { "label": "Source code", "href": "https://github.com/HarithKavish/my_chatgpt" }
+      ],
+      "release_repo": "HarithKavish/my_chatgpt",
+      "builds": [
+        {
+          "platform": "Android",
+          "format": "APK",
+          "manifest": "apps/jarvis/mobile/android/latest.json",
+          "requirements": "Android 8.0 or newer, roughly 150 MB free space",
+          "install": [
+            "Open this page on your Android device and tap Get.",
+            "Allow installs from your browser under Settings → Apps → Special access → Install unknown apps.",
+            "Open the downloaded file from your notification tray or Downloads folder and tap Install.",
+            "Launch Jarvis, sign in, and start a conversation."
+          ]
+        }
+      ]
+    }
+  ]
+}
