@@ -7,18 +7,14 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # peaceiris publishes by pushing the gh-pages branch, which needs write
+    # access to the repository contents, not just to Pages.
     permissions:
-      pages: write
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node (for potential build)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
