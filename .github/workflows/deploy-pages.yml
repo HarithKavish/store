@@ -16,6 +16,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Pages serves CSS and JS with a four-hour cache but HTML with ten
+      # minutes, so unversioned asset URLs leave browsers running old code
+      # against a fresh page. Stamping the commit into them closes that gap.
+      - name: Stamp asset versions
+        run: sed -i "s/?v=dev/?v=${GITHUB_SHA::7}/g" index.html
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
