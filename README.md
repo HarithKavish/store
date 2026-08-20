@@ -35,7 +35,6 @@ tiles, a spotlight, filters, and the app detail layout.
   "publisher": "Harith Kavish",
   "tagline": "One line that explains the app.",
   "category": "Productivity",
-  "status": "Live",
   "icon": "apps/example/icon.png",
   "accent": "#3aa8ff",
   "description": "A paragraph for the detail page.",
@@ -54,9 +53,14 @@ tiles, a spotlight, filters, and the app detail layout.
 }
 ```
 
-Optional keys: `featured` promotes an app to the spotlight, and a build may carry
-a direct `url` instead of a `manifest` when nothing generates one for it. An app
-with no downloadable build still lists — its button reads *Coming soon*.
+Optional keys: `featured` promotes an app to the spotlight, `price` shows where a
+store usually shows one, and a build may carry a direct `url` instead of a
+`manifest` when nothing generates one for it.
+
+Status is derived, not declared: an app with a downloadable build reads *Live*,
+one without reads *Coming soon*, so a listing cannot go stale between the entry
+and the first release. Add a `status` only to say something the build state
+cannot — `"Beta"`, for instance.
 
 ## Releasing a new version
 
@@ -67,6 +71,24 @@ release in `release_repo` when one exists, otherwise the commit subject).
 
 `latest.json` keeps both `url` and `apk_url`: the Jarvis in-app updater reads
 `apk_url`, so that key stays in place.
+
+### Publishing from the app's own repository
+
+Both apps push their builds here from their source repos — `my_chatgpt` for
+Jarvis, `ReWeb` for ReWeb — with a *Publish to Store* workflow that builds a
+signed release APK, tags a GitHub Release, then commits the APK to this
+repository. Such a workflow owes this store two things:
+
+- the versioned filename `apps/<slug>/mobile/android/<slug>-vX.Y.Z.apk`, since
+  the manifest scan derives the version from it and an unversioned copy would
+  confuse the highest-version pick;
+- the GitHub Release created *before* the push, so the notes lookup against
+  `release_repo` finds a body to use.
+
+It needs `STORE_REPO_PAT` (write access to this repository) plus the signing
+secrets its own build requires. Every build of an app must be signed with the
+same key — Android identifies an app by its signature, so a new key reads as a
+different app and existing installs can no longer update.
 
 ## Deploying
 
