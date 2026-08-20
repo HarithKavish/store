@@ -44,7 +44,10 @@
         }
       ],
       "links": [
-        { "label": "Source code", "href": "https://github.com/HarithKavish/my_chatgpt" }
+        {
+          "label": "Source code",
+          "href": "https://github.com/HarithKavish/my_chatgpt"
+        }
       ],
       "release_repo": "HarithKavish/my_chatgpt",
       "builds": [
@@ -58,6 +61,66 @@
             "Allow installs from your browser under Settings → Apps → Special access → Install unknown apps.",
             "Open the downloaded file from your notification tray or Downloads folder and tap Install.",
             "Launch Jarvis, sign in, and start a conversation."
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "reweb",
+      "name": "ReWeb",
+      "publisher": "Harith Kavish",
+      "tagline": "A browser that keeps old phones on the modern web.",
+      "category": "Tools",
+      "price": "Free",
+      "status": "Live",
+      "featured": false,
+      "icon": "apps/reweb/icon.png",
+      "accent": "#1F5B8F",
+      "description": "ReWeb is a lightweight browser for Android phones the rest of the web has left behind. It runs on the device's own system WebView, which the Play Store still updates independently of the OS, so a handset from 2016 can render today's sites. Where something genuinely cannot work, ReWeb says so and explains why instead of showing a blank page.",
+      "features": [
+        {
+          "title": "Built for old hardware",
+          "detail": "Caps live tabs to what the device's memory allows, suspending the rest without losing them."
+        },
+        {
+          "title": "Honest diagnostics",
+          "detail": "Runs real capability probes in your engine and reports PASS, FAIL or UNKNOWN - never a guess."
+        },
+        {
+          "title": "Repairs old TLS",
+          "detail": "Detects a frozen certificate store and shows how to install the modern root that fixes it."
+        },
+        {
+          "title": "Per-site user agents",
+          "detail": "Switch a single site between mobile, desktop or a custom identity when it refuses your engine."
+        },
+        {
+          "title": "Installable web apps",
+          "detail": "Save a site to run in its own window and its own task, with its own user agent."
+        },
+        {
+          "title": "Local by default",
+          "detail": "No account, no sync, no server. History, bookmarks and downloads never leave the device."
+        }
+      ],
+      "links": [
+        {
+          "label": "Source code",
+          "href": "https://github.com/HarithKavish/ReWeb"
+        }
+      ],
+      "release_repo": "HarithKavish/ReWeb",
+      "builds": [
+        {
+          "platform": "Android",
+          "format": "APK",
+          "manifest": "apps/reweb/mobile/android/latest.json",
+          "requirements": "Android 5.0 or newer, about 5 MB free space",
+          "install": [
+            "Open this page on your Android device and tap Get.",
+            "Allow installs from your browser under Settings -> Apps -> Special access -> Install unknown apps.",
+            "Open the downloaded file from your notification tray or Downloads folder and tap Install.",
+            "Launch ReWeb, then open Diagnostics to see what your device's engine supports."
           ]
         }
       ]
