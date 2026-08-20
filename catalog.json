@@ -12,7 +12,6 @@
       "tagline": "Your personal AI assistant — always in your pocket.",
       "category": "Productivity",
       "price": "Free",
-      "status": "Live",
       "featured": true,
       "icon": "apps/jarvis/icon.png",
       "accent": "#3aa8ff",
@@ -72,7 +71,6 @@
       "tagline": "A browser that keeps old phones on the modern web.",
       "category": "Tools",
       "price": "Free",
-      "status": "Live",
       "featured": false,
       "icon": "apps/reweb/icon.png",
       "accent": "#1F5B8F",
@@ -84,7 +82,7 @@
         },
         {
           "title": "Honest diagnostics",
-          "detail": "Runs real capability probes in your engine and reports PASS, FAIL or UNKNOWN - never a guess."
+          "detail": "Runs real capability probes in your engine and reports PASS, FAIL or UNKNOWN — never a guess."
         },
         {
           "title": "Repairs old TLS",
@@ -115,10 +113,10 @@
           "platform": "Android",
           "format": "APK",
           "manifest": "apps/reweb/mobile/android/latest.json",
-          "requirements": "Android 5.0 or newer, about 5 MB free space",
+          "requirements": "Android 5.0 (API 21) or newer",
           "install": [
             "Open this page on your Android device and tap Get.",
-            "Allow installs from your browser under Settings -> Apps -> Special access -> Install unknown apps.",
+            "Allow installs from your browser under Settings → Apps → Special access → Install unknown apps.",
             "Open the downloaded file from your notification tray or Downloads folder and tap Install.",
             "Launch ReWeb, then open Diagnostics to see what your device's engine supports."
           ]

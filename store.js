@@ -145,6 +145,18 @@
         });
     }
 
+    /*
+     * An app is live when there is something to install, so the catalog only
+     * carries a status when it means something else — "Beta", say.
+     */
+    function appStatus(app) {
+        if (app.status) {
+            return app.status;
+        }
+        var build = primaryBuild(app);
+        return build && build.url ? 'Live' : 'Coming soon';
+    }
+
     function primaryBuild(app) {
         var withUrl = app.builds.filter(function (build) {
             return build.url;
@@ -432,7 +444,7 @@
             infoRow('Publisher', app.publisher || state.store.publisher) +
             infoRow('Price', app.price) +
             infoRow('Category', app.category) +
-            infoRow('Status', app.status) +
+            infoRow('Status', appStatus(app)) +
             infoRow('Platforms', appPlatforms(app).join(', ')) +
             infoRow('Version', build && build.version ? 'v' + build.version : '') +
             infoRow('Size', build ? formatSize(build.size) : '') +
@@ -465,7 +477,7 @@
                     '<p class="detail-head__lead">' + esc(app.tagline || '') + '</p>' +
                     '<div class="detail-head__pills">' +
                         (app.category ? pill(app.category, 'neutral') : '') +
-                        (app.status ? pill(app.status, statusTone(app.status)) : '') +
+                        pill(appStatus(app), statusTone(appStatus(app))) +
                         appPlatforms(app).map(function (platform) {
                             return pill(platform, 'neutral');
                         }).join('') +
