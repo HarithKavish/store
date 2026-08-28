@@ -5,7 +5,6 @@
 (function () {
     'use strict';
 
-    var THEME_KEY = 'harithkavish-theme';
     var root = document.getElementById('store-root');
     var state = {
         store: {},
@@ -13,34 +12,6 @@
         query: '',
         platform: 'all'
     };
-
-    /* ── Chrome shared with the rest of the ecosystem ── */
-
-    function applyTheme(theme, persist) {
-        var button = document.querySelector('[data-theme-toggle]');
-        document.documentElement.dataset.theme = theme;
-        if (persist) {
-            localStorage.setItem(THEME_KEY, theme);
-        }
-        if (button) {
-            button.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
-            button.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-        }
-    }
-
-    function initChrome() {
-        var button = document.querySelector('[data-theme-toggle]');
-        applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light', false);
-        if (button) {
-            button.addEventListener('click', function () {
-                applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark', true);
-            });
-        }
-        var year = document.querySelector('[data-year]');
-        if (year) {
-            year.textContent = new Date().getFullYear();
-        }
-    }
 
     /* ── Formatting ── */
 
@@ -536,7 +507,6 @@
         window.addEventListener('popstate', render);
     }
 
-    initChrome();
     initRouting();
 
     loadCatalog().then(render).catch(function () {
