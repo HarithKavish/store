@@ -22,51 +22,34 @@
     <link rel="icon" href="/favicon.png" type="image/png" sizes="128x128">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <!-- Shared theme from the main site, so the store follows it automatically. -->
-    <link rel="stylesheet" href="https://harithkavish.com/style.css">
-    <link rel="stylesheet" href="/store.css?v=b06f68f">
-    <script>
-        document.documentElement.dataset.theme = localStorage.getItem('harithkavish-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    </script>
+    <!-- The shared design system, then only what the store adds on top. -->
+    <link rel="stylesheet" href="https://harithkavish.com/design-system/v1.0.0/tokens.css">
+    <link rel="stylesheet" href="https://harithkavish.com/design-system/v1.0.0/base.css">
+    <link rel="stylesheet" href="https://harithkavish.com/design-system/v1.0.0/components.css">
+    <link rel="stylesheet" href="https://harithkavish.com/design-system/v1.0.0/utils.css">
+    <link rel="stylesheet" href="/store.css?v=66b5675">
+    <script src="https://harithkavish.com/design-system/v1.0.0/theme-toggle.js"></script>
+    <script src="https://harithkavish.com/design-system/v1.0.0/harith-shell.js"></script>
     <title>Store — Harith Kavish</title>
 </head>
 <body data-page="store">
     <div class="site-shell">
-        <header class="site-header">
-            <div class="site-header__inner">
-                <a class="brand" href="/">
-                    <img class="brand__mark" src="/logo.png" alt="" aria-hidden="true">
-                    <span class="brand__text">
-                        <span class="brand__name">Harith Kavish</span>
-                        <span class="brand__descriptor">Store</span>
-                    </span>
-                </a>
-                <div class="site-header__actions">
-                    <nav class="site-nav" aria-label="Primary">
-                        <a class="site-nav__link" href="https://harithkavish.com/">Home</a>
-                        <a class="site-nav__link" href="https://nexus.harithkavish.com/">Nexus</a>
-                    </nav>
-                    <button type="button" class="theme-toggle" data-theme-toggle="true" aria-label="Switch to dark mode">Dark mode</button>
-                </div>
-            </div>
-        </header>
+        <harith-header
+            site-title="Harith Kavish"
+            site-tagline="Store"
+            brand-href="/"
+            brand-mark="/logo.png"
+            nav-links='[{"label":"Home","href":"https://harithkavish.com/"},{"label":"Nexus","href":"https://nexus.harithkavish.com/"}]'></harith-header>
 
         <main class="site-main" id="store-root" aria-live="polite">
             <p class="store-loading">Loading the catalog…</p>
         </main>
 
-        <footer class="site-footer">
-            <div class="site-footer__inner">
-                <p class="site-footer__copy">© <span data-year>2026</span> Harith Kavish</p>
-                <nav class="site-footer__nav" aria-label="Footer">
-                    <a class="site-nav__link" href="https://harithkavish.com/">Home</a>
-                    <a class="site-nav__link" href="https://nexus.harithkavish.com/">Nexus</a>
-                    <a class="site-nav__link" href="https://harithkavish.com/status.html">Status</a>
-                    <a class="site-nav__link" href="https://harithkavish.com/legal.html">Legal</a>
-                </nav>
-            </div>
-        </footer>
+        <harith-footer
+            copyright-text="Harith Kavish"
+            links='[{"label":"Home","href":"https://harithkavish.com/"},{"label":"Nexus","href":"https://nexus.harithkavish.com/"},{"label":"Status","href":"https://harithkavish.com/status.html"},{"label":"Legal","href":"https://harithkavish.com/legal.html"}]'></harith-footer>
     </div>
 
-    <script src="/store.js?v=b06f68f"></script>
+    <script src="/store.js?v=66b5675"></script>
 </body>
 </html>
