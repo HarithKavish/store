@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
+
+    <ImageView
+        android:id="@+id/appIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@color/divider"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="12dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/appName"
+            style="@style/AppRowTitle"
+            tools:text="Jarvis" />
+
+        <TextView
+            android:id="@+id/appTagline"
+            style="@style/AppRowSubtitle"
+            android:maxLines="1"
+            android:ellipsize="end"
+            tools:text="Your personal AI assistant" />
+
+        <TextView
+            android:id="@+id/appStatus"
+            style="@style/AppRowStatus"
+            tools:text="Update available · v0.0.10 → v0.0.11" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/appAction"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="88dp"
+        tools:text="Update" />
+</LinearLayout>
