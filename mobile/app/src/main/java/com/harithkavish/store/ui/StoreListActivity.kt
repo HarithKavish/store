@@ -11,6 +11,7 @@ import com.harithkavish.store.R
 import com.harithkavish.store.catalog.BuildManifest
 import com.harithkavish.store.catalog.CatalogApp
 import com.harithkavish.store.catalog.CatalogRepository
+import com.harithkavish.store.catalog.SemVer
 import com.harithkavish.store.databinding.ActivityStoreListBinding
 import com.harithkavish.store.installed.InstalledAppsResolver
 import com.harithkavish.store.update.UpdateAllCoordinator
@@ -104,6 +105,29 @@ class StoreListActivity : AppCompatActivity() {
         // Installed versions can change any time the user leaves and returns
         // (they may have just finished an install), so re-check on every resume.
         if (rows.isNotEmpty()) refreshInstalledStatuses()
+        retryPendingInstalls()
+    }
+
+    /**
+     * Re-attempts any download DownloadCompleteReceiver couldn't hand to the
+     * installer for certain (it can't tell, from a background receiver, whether
+     * Android silently dropped that startActivity -- see UpdateManager.launchInstaller).
+     * onResume always has a visible window, so the same call here isn't subject to
+     * that restriction and reliably prompts the user.
+     */
+    private fun retryPendingInstalls() {
+        for (downloadId in updateManager.allPendingDownloadIds()) {
+            val pending = updateManager.pendingUpdate(downloadId) ?: continue
+            val installedVersion = installedApps.installedVersion(
+                rows.firstOrNull { it.app.slug == pending.slug }?.app?.androidBuild?.packageName ?: continue
+            )
+            if (installedVersion != null && !SemVer.isNewer(pending.version, installedVersion)) {
+                // Already installed (or a newer build already is) -- nothing left to do.
+                updateManager.clearPending(downloadId)
+                continue
+            }
+            updateManager.launchInstaller(downloadId)
+        }
     }
 
     override fun onDestroy() {

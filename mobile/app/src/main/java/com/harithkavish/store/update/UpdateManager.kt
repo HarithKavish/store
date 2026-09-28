@@ -3,12 +3,13 @@ package com.harithkavish.store.update
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.core.content.FileProvider
+import org.json.JSONObject
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
 
 /** One app's pending install, keyed by the DownloadManager id that will deliver it. */
 data class PendingUpdate(
@@ -30,14 +31,24 @@ data class PendingUpdate(
 class UpdateManager(private val context: Context) {
 
     companion object {
-        /**
-         * DownloadManager's ACTION_DOWNLOAD_COMPLETE is broadcast system-wide for
-         * every completed download on the device, from any app -- not just ours.
-         * This map is how DownloadCompleteReceiver tells "an update Store queued"
-         * apart from "some unrelated download from another app" before acting on it.
-         */
-        val pendingDownloads = ConcurrentHashMap<Long, PendingUpdate>()
+        private const val PREFS_NAME = "update_manager_pending"
     }
+
+    /**
+     * DownloadManager's ACTION_DOWNLOAD_COMPLETE is broadcast system-wide for every
+     * completed download on the device, from any app -- not just ours -- so this is
+     * how DownloadCompleteReceiver tells "an update Store queued" apart from "some
+     * unrelated download from another app" before acting on it.
+     *
+     * Backed by SharedPreferences rather than an in-memory map: Android routinely
+     * kills Store's process while a multi-MB APK downloads in the background, and
+     * the manifest-registered receiver then runs in a fresh process with nothing
+     * else to go on. A record here also survives past a failed install attempt, so
+     * StoreListActivity can retry it once the app is foregrounded (see
+     * [launchInstaller]'s doc on why that retry is necessary).
+     */
+    private fun prefs(): SharedPreferences =
+        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     fun enqueueDownload(slug: String, displayName: String, version: String, apkUrl: String): Long {
         val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
@@ -53,8 +64,33 @@ class UpdateManager(private val context: Context) {
         }
 
         val id = manager.enqueue(request)
-        pendingDownloads[id] = PendingUpdate(slug, displayName, version)
+        persistPending(id, PendingUpdate(slug, displayName, version))
         return id
+    }
+
+    /** The update queued for [downloadId], if any. Left in place until [clearPending]. */
+    fun pendingUpdate(downloadId: Long): PendingUpdate? {
+        val raw = prefs().getString(downloadId.toString(), null) ?: return null
+        return runCatching {
+            val json = JSONObject(raw)
+            PendingUpdate(json.getString("slug"), json.getString("displayName"), json.getString("version"))
+        }.getOrNull()
+    }
+
+    /** Every download still awaiting a confirmed install. */
+    fun allPendingDownloadIds(): List<Long> = prefs().all.keys.mapNotNull { it.toLongOrNull() }
+
+    fun clearPending(downloadId: Long) {
+        prefs().edit().remove(downloadId.toString()).apply()
+    }
+
+    private fun persistPending(downloadId: Long, pending: PendingUpdate) {
+        val json = JSONObject().apply {
+            put("slug", pending.slug)
+            put("displayName", pending.displayName)
+            put("version", pending.version)
+        }
+        prefs().edit().putString(downloadId.toString(), json.toString()).apply()
     }
 
     fun canRequestInstallPackages(): Boolean =
@@ -63,7 +99,18 @@ class UpdateManager(private val context: Context) {
     fun installPermissionSettingsIntent(): Intent =
         Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${context.packageName}"))
 
-    /** Call once [downloadId] is reported complete. Returns false if the file couldn't be resolved. */
+    /**
+     * Call once [downloadId] is reported complete. Returns false if the file couldn't
+     * be resolved or the installer couldn't be started.
+     *
+     * Android 10+ restricts starting an Activity from a process with no visible
+     * window, which is exactly what a manifest-registered BroadcastReceiver is --
+     * and it fails that *silently*, without throwing, so a `true` result from a
+     * background caller is not proof the installer actually appeared. The pending
+     * record is left in place (see [pendingUpdate]) specifically so a foreground
+     * caller -- StoreListActivity.onResume -- can call this again once the app has
+     * a visible window, where the restriction doesn't apply.
+     */
     fun launchInstaller(downloadId: Long): Boolean {
         val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val localUri = queryLocalUri(manager, downloadId) ?: return false

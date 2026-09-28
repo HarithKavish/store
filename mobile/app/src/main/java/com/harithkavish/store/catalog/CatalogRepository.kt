@@ -92,7 +92,10 @@ class CatalogRepository {
 
     private fun parseManifest(json: JSONObject): BuildManifest = BuildManifest(
         version = json.getString("version"),
-        apkUrl = nullableString(json, "apk_url") ?: json.optString("url"),
+        // optString("url") would return "" (not null) when the key is absent --
+        // nullableString keeps a genuinely missing URL as null instead of an
+        // empty string that would reach Uri.parse("") downstream.
+        apkUrl = nullableString(json, "apk_url") ?: nullableString(json, "url"),
         sizeBytes = json.optLong("size_bytes", 0L),
         releaseNotes = nullableString(json, "release_notes")
     )

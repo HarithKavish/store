@@ -26,7 +26,8 @@ data class AndroidBuild(
 /** One app's `latest.json` — see store/apps/<slug>/mobile/android/latest.json. */
 data class BuildManifest(
     val version: String,
-    val apkUrl: String,
+    /** Null when the manifest carries no usable download link. */
+    val apkUrl: String?,
     val sizeBytes: Long,
     val releaseNotes: String?
 )
