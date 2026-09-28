@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="launcher_background">#7A5CFA</color>
+    <color name="launcher_foreground">#F4F1FF</color>
+
+    <color name="primary">#7A5CFA</color>
+    <color name="primary_dark">#5B3FE0</color>
+
+    <color name="page_background">#FFFFFF</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="text_primary">#1B1B1B</color>
+    <color name="text_secondary">#5F5F5F</color>
+    <color name="divider">#E0E0E0</color>
+
+    <color name="status_update">#B06F16</color>
+    <color name="status_current">#1E7B34</color>
+    <color name="status_missing">#5F5F5F</color>
+</resources>
