@@ -79,6 +79,11 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # Override the action's default ('tools platform-tools'): Google has
+          # removed the legacy 'tools' package from the SDK repository, so the
+          # default install now fails outright. Gradle only needs platform-tools.
+          packages: 'platform-tools'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
