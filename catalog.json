@@ -122,6 +122,65 @@
           ]
         }
       ]
+    },
+    {
+      "slug": "keyboard",
+      "name": "Glass Keyboard",
+      "publisher": "Harith Kavish",
+      "tagline": "A QWERTY keyboard you can see straight through.",
+      "category": "Tools",
+      "price": "Free",
+      "featured": false,
+      "icon": "apps/keyboard/icon.png",
+      "accent": "#8FA6C8",
+      "description": "Glass Keyboard is a QWERTY keyboard with no background of its own. The app behind it shows straight through the gaps, and the keys read as panes of glass laid over whatever you are reading. It is deliberately small - four classes, no libraries, and an install of around 40 KB, which is roughly a thousandth of what a mainstream keyboard takes. Nothing it types leaves the device, because there is nothing in it that could send anything anywhere.",
+      "features": [
+        {
+          "title": "Transparent by design",
+          "detail": "No panel behind the keys - the app you are using stays visible while you type."
+        },
+        {
+          "title": "Glass keys",
+          "detail": "Each key is a translucent pane with its own rim light, in a light and a dark treatment."
+        },
+        {
+          "title": "About 40 KB",
+          "detail": "No AndroidX, no Kotlin, no libraries at all. It installs in the time it takes to tap Install."
+        },
+        {
+          "title": "Nothing to configure",
+          "detail": "Letters, symbols, shift with caps lock, and a backspace that repeats. No settings screen to get lost in."
+        },
+        {
+          "title": "Knows what Enter means",
+          "detail": "Runs a search box's search and a message box's newline, rather than always sending one or the other."
+        },
+        {
+          "title": "No network, no account",
+          "detail": "It holds no permissions and makes no connections. What you type stays in the app you typed it into."
+        }
+      ],
+      "links": [
+        {
+          "label": "Source code",
+          "href": "https://github.com/HarithKavish/keyboard"
+        }
+      ],
+      "release_repo": "HarithKavish/keyboard",
+      "builds": [
+        {
+          "platform": "Android",
+          "format": "APK",
+          "manifest": "apps/keyboard/mobile/android/latest.json",
+          "requirements": "Android 5.0 (API 21) or newer",
+          "install": [
+            "Open this page on your Android device and tap Get.",
+            "Allow installs from your browser under Settings - Apps - Special access - Install unknown apps.",
+            "Open the downloaded file from your notification tray or Downloads folder and tap Install.",
+            "Open Glass Keyboard, enable it in the input method list, then choose it as your keyboard."
+          ]
+        }
+      ]
     }
   ]
 }
