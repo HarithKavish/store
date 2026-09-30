@@ -20,9 +20,11 @@ class DownloadCompleteReceiver : BroadcastReceiver() {
 
         if (updateManager.isTerminallyFailed(downloadId)) {
             // The download itself failed (or its record is gone) -- there is nothing
-            // to install and no point retrying. Clear it now rather than leaving it
-            // for StoreListActivity to keep re-checking on every resume forever.
+            // to install and no point retrying. Clear it now, and any partial file
+            // with it, rather than leaving it for StoreListActivity to keep
+            // re-checking on every resume forever.
             updateManager.clearPending(downloadId)
+            updateManager.deleteDownloadedFile(pending)
             UpdateEvents.notifyDownloadHandled(downloadId, pending, installerLaunched = false)
             return
         }

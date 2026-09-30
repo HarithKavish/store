@@ -122,13 +122,16 @@ class StoreListActivity : AppCompatActivity() {
             val installedVersion = packageName?.let { installedApps.installedVersion(it) }
             when {
                 installedVersion != null && !SemVer.isNewer(pending.version, installedVersion) -> {
-                    // Already installed (or a newer build already is) -- nothing left to do.
+                    // Already installed (or a newer build already is) -- nothing left
+                    // to do, and no reason to keep the APK around any longer.
                     updateManager.clearPending(downloadId)
+                    updateManager.deleteDownloadedFile(pending)
                 }
                 updateManager.isTerminallyFailed(downloadId) -> {
                     // The download itself failed, or its record is gone -- retrying
                     // gets nothing back but a permanently stuck entry.
                     updateManager.clearPending(downloadId)
+                    updateManager.deleteDownloadedFile(pending)
                 }
                 else -> updateManager.launchInstaller(downloadId)
             }

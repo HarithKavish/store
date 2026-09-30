@@ -54,13 +54,6 @@ class UpdateManager(private val context: Context) {
         val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val fileName = "$slug-v$version.apk"
 
-        // A retry of the same version reuses this exact filename (see below):
-        // DownloadManager can fail the new request outright if a file from an
-        // earlier attempt is still sitting at that destination.
-        context.getExternalFilesDir("updates")?.let { dir ->
-            File(dir, fileName).takeIf { it.exists() }?.delete()
-        }
-
         val request = DownloadManager.Request(Uri.parse(apkUrl)).apply {
             setTitle(displayName)
             setDescription("Downloading update")
@@ -89,6 +82,21 @@ class UpdateManager(private val context: Context) {
 
     fun clearPending(downloadId: Long) {
         prefs().edit().remove(downloadId.toString()).apply()
+    }
+
+    /**
+     * Removes the downloaded APK for [pending], if any is still on disk. Call this
+     * alongside [clearPending] once a download's outcome is settled (installed, or
+     * confirmed dead via [isTerminallyFailed]) -- not at enqueue time: two requests
+     * for the same slug/version share this exact destination filename, so deleting it
+     * unconditionally on a fresh enqueue can destroy a still-running or
+     * already-succeeded-but-not-yet-installed earlier download for that same build.
+     */
+    fun deleteDownloadedFile(pending: PendingUpdate) {
+        val fileName = "${pending.slug}-v${pending.version}.apk"
+        context.getExternalFilesDir("updates")?.let { dir ->
+            File(dir, fileName).takeIf { it.exists() }?.delete()
+        }
     }
 
     private fun persistPending(downloadId: Long, pending: PendingUpdate) {
@@ -151,10 +159,13 @@ class UpdateManager(private val context: Context) {
 
     /**
      * True when [downloadId] has reached a state DownloadManager will never resolve on
-     * its own -- it failed, or its record is gone entirely (e.g. the user cleared it
-     * from the system Downloads app). A caller holding a pending record for such an id
-     * should clear it: retrying gets nothing back but a "Downloading..." row stuck
-     * forever, and [allPendingDownloadIds] growing without bound.
+     * its own -- it failed, its record is gone entirely (e.g. the user cleared it from
+     * the system Downloads app), or it succeeded but the file it wrote has since
+     * disappeared (deleted externally, or by [deleteDownloadedFile] once this same
+     * outcome was detected for an earlier id sharing the same slug/version). A caller
+     * holding a pending record for such an id should clear it: retrying gets nothing
+     * back but a "Downloading..." row stuck forever, and [allPendingDownloadIds]
+     * growing without bound.
      */
     fun isTerminallyFailed(downloadId: Long): Boolean {
         val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
@@ -163,7 +174,15 @@ class UpdateManager(private val context: Context) {
             if (!cursor.moveToFirst()) return true
             val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
             if (statusIndex < 0) return true
-            return cursor.getInt(statusIndex) == DownloadManager.STATUS_FAILED
+            return when (cursor.getInt(statusIndex)) {
+                DownloadManager.STATUS_FAILED -> true
+                DownloadManager.STATUS_SUCCESSFUL -> {
+                    val uriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
+                    val localUri = if (uriIndex >= 0) cursor.getString(uriIndex) else null
+                    localUri == null || uriToFile(localUri)?.exists() != true
+                }
+                else -> false
+            }
         }
         return true
     }
