@@ -54,6 +54,13 @@ class UpdateManager(private val context: Context) {
         val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val fileName = "$slug-v$version.apk"
 
+        // A retry of the same version reuses this exact filename (see below):
+        // DownloadManager can fail the new request outright if a file from an
+        // earlier attempt is still sitting at that destination.
+        context.getExternalFilesDir("updates")?.let { dir ->
+            File(dir, fileName).takeIf { it.exists() }?.delete()
+        }
+
         val request = DownloadManager.Request(Uri.parse(apkUrl)).apply {
             setTitle(displayName)
             setDescription("Downloading update")
@@ -140,6 +147,25 @@ class UpdateManager(private val context: Context) {
                 false
             }
         }
+    }
+
+    /**
+     * True when [downloadId] has reached a state DownloadManager will never resolve on
+     * its own -- it failed, or its record is gone entirely (e.g. the user cleared it
+     * from the system Downloads app). A caller holding a pending record for such an id
+     * should clear it: retrying gets nothing back but a "Downloading..." row stuck
+     * forever, and [allPendingDownloadIds] growing without bound.
+     */
+    fun isTerminallyFailed(downloadId: Long): Boolean {
+        val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val query = DownloadManager.Query().setFilterById(downloadId)
+        manager.query(query)?.use { cursor ->
+            if (!cursor.moveToFirst()) return true
+            val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+            if (statusIndex < 0) return true
+            return cursor.getInt(statusIndex) == DownloadManager.STATUS_FAILED
+        }
+        return true
     }
 
     private fun queryLocalUri(manager: DownloadManager, downloadId: Long): String? {
