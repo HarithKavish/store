@@ -84,6 +84,21 @@ class UpdateManager(private val context: Context) {
         prefs().edit().remove(downloadId.toString()).apply()
     }
 
+    /**
+     * Removes the downloaded APK for [pending], if any is still on disk. Call this
+     * alongside [clearPending] once a download's outcome is settled (installed, or
+     * confirmed dead via [isTerminallyFailed]) -- not at enqueue time: two requests
+     * for the same slug/version share this exact destination filename, so deleting it
+     * unconditionally on a fresh enqueue can destroy a still-running or
+     * already-succeeded-but-not-yet-installed earlier download for that same build.
+     */
+    fun deleteDownloadedFile(pending: PendingUpdate) {
+        val fileName = "${pending.slug}-v${pending.version}.apk"
+        context.getExternalFilesDir("updates")?.let { dir ->
+            File(dir, fileName).takeIf { it.exists() }?.delete()
+        }
+    }
+
     private fun persistPending(downloadId: Long, pending: PendingUpdate) {
         val json = JSONObject().apply {
             put("slug", pending.slug)
@@ -140,6 +155,36 @@ class UpdateManager(private val context: Context) {
                 false
             }
         }
+    }
+
+    /**
+     * True when [downloadId] has reached a state DownloadManager will never resolve on
+     * its own -- it failed, its record is gone entirely (e.g. the user cleared it from
+     * the system Downloads app), or it succeeded but the file it wrote has since
+     * disappeared (deleted externally, or by [deleteDownloadedFile] once this same
+     * outcome was detected for an earlier id sharing the same slug/version). A caller
+     * holding a pending record for such an id should clear it: retrying gets nothing
+     * back but a "Downloading..." row stuck forever, and [allPendingDownloadIds]
+     * growing without bound.
+     */
+    fun isTerminallyFailed(downloadId: Long): Boolean {
+        val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val query = DownloadManager.Query().setFilterById(downloadId)
+        manager.query(query)?.use { cursor ->
+            if (!cursor.moveToFirst()) return true
+            val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+            if (statusIndex < 0) return true
+            return when (cursor.getInt(statusIndex)) {
+                DownloadManager.STATUS_FAILED -> true
+                DownloadManager.STATUS_SUCCESSFUL -> {
+                    val uriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
+                    val localUri = if (uriIndex >= 0) cursor.getString(uriIndex) else null
+                    localUri == null || uriToFile(localUri)?.exists() != true
+                }
+                else -> false
+            }
+        }
+        return true
     }
 
     private fun queryLocalUri(manager: DownloadManager, downloadId: Long): String? {

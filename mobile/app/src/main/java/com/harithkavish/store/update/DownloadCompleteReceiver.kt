@@ -18,6 +18,17 @@ class DownloadCompleteReceiver : BroadcastReceiver() {
         // system-wide broadcast. Nothing to do.
         val pending = updateManager.pendingUpdate(downloadId) ?: return
 
+        if (updateManager.isTerminallyFailed(downloadId)) {
+            // The download itself failed (or its record is gone) -- there is nothing
+            // to install and no point retrying. Clear it now, and any partial file
+            // with it, rather than leaving it for StoreListActivity to keep
+            // re-checking on every resume forever.
+            updateManager.clearPending(downloadId)
+            updateManager.deleteDownloadedFile(pending)
+            UpdateEvents.notifyDownloadHandled(downloadId, pending, installerLaunched = false)
+            return
+        }
+
         // Best-effort only: this receiver has no visible window, so Android may
         // silently drop the startActivity call below (see launchInstaller's doc).
         // The record is deliberately NOT cleared here -- it stays in UpdateManager's

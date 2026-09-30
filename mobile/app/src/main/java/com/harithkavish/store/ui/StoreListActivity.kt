@@ -118,15 +118,23 @@ class StoreListActivity : AppCompatActivity() {
     private fun retryPendingInstalls() {
         for (downloadId in updateManager.allPendingDownloadIds()) {
             val pending = updateManager.pendingUpdate(downloadId) ?: continue
-            val installedVersion = installedApps.installedVersion(
-                rows.firstOrNull { it.app.slug == pending.slug }?.app?.androidBuild?.packageName ?: continue
-            )
-            if (installedVersion != null && !SemVer.isNewer(pending.version, installedVersion)) {
-                // Already installed (or a newer build already is) -- nothing left to do.
-                updateManager.clearPending(downloadId)
-                continue
+            val packageName = rows.firstOrNull { it.app.slug == pending.slug }?.app?.androidBuild?.packageName
+            val installedVersion = packageName?.let { installedApps.installedVersion(it) }
+            when {
+                installedVersion != null && !SemVer.isNewer(pending.version, installedVersion) -> {
+                    // Already installed (or a newer build already is) -- nothing left
+                    // to do, and no reason to keep the APK around any longer.
+                    updateManager.clearPending(downloadId)
+                    updateManager.deleteDownloadedFile(pending)
+                }
+                updateManager.isTerminallyFailed(downloadId) -> {
+                    // The download itself failed, or its record is gone -- retrying
+                    // gets nothing back but a permanently stuck entry.
+                    updateManager.clearPending(downloadId)
+                    updateManager.deleteDownloadedFile(pending)
+                }
+                else -> updateManager.launchInstaller(downloadId)
             }
-            updateManager.launchInstaller(downloadId)
         }
     }
 
