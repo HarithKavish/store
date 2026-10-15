@@ -26,6 +26,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Each app's release date is the commit that added its APK.
+          fetch-depth: 0
+
+      # The catalogue's latest.json files are generated here, into what is published,
+      # rather than committed back to main (that was update-latest.yml).
+      - name: Generate app manifests
+        run: bash tools/update_manifests.sh
 
       # Pages serves CSS and JS with a four-hour cache but HTML with ten
       # minutes, so unversioned asset URLs leave browsers running old code

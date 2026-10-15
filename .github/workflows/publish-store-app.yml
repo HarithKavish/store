@@ -1,10 +1,10 @@
 name: Publish Store to Store
 
-# Builds, signs and releases the Store app itself, then publishes it into this
-# same repository's own catalogue (apps/store/mobile/android/). Store's source
+# Builds, signs and releases the Store app itself, then opens a pull request adding
+# it to this repository's own catalogue (apps/store/mobile/android/). Store's source
 # lives in this repo (mobile/), so unlike ReWeb or Jarvis's publish workflows,
-# this one never clones a second repository or needs STORE_REPO_PAT -- source
-# and destination are the same checkout.
+# the release still goes in as a pull request opened with STORE_REPO_PAT, because a
+# pull request opened with GITHUB_TOKEN triggers no review and no gate.
 
 on:
   workflow_dispatch:
@@ -15,13 +15,7 @@ on:
         type: string
 
 permissions:
-  contents: write
-  # Needed only for the "Refresh app manifests" step below: a push made with
-  # this workflow's own GITHUB_TOKEN does not trigger another workflow's
-  # `push` event (GitHub suppresses that to prevent recursive triggering), so
-  # update-latest.yml has to be re-triggered explicitly via workflow_dispatch,
-  # which is not subject to that restriction.
-  actions: write
+  contents: write     # the GitHub Release
 
 defaults:
   run:
@@ -196,26 +190,55 @@ jobs:
             echo "NOTES_EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Copy APK into the catalogue and commit
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
+      - name: Open the store release pull request
         working-directory: .
+        env:
+          STORE_REPO_PAT: ${{ secrets.STORE_REPO_PAT }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
+          if [ -z "${STORE_REPO_PAT:-}" ]; then
+            echo "::error::STORE_REPO_PAT is not set; cannot open the store release pull request."
+            exit 1
+          fi
+          APK_SRC="$GITHUB_WORKSPACE/${{ env.apk }}"
+          [ -n "$APK_SRC" ] && [ -f "$APK_SRC" ] || { echo "::error::No APK to publish"; exit 1; }
+          APK_SRC=$(realpath "$APK_SRC")
+
+          # Protected branches accept changes only through pull requests, from anyone
+          # (governance BRANCHING.md, no bypass), so the release goes in as one: from this
+          # pipeline's own persistent branch, reset onto development each time, into
+          # development with auto-merge. It reaches the live store as it is promoted to main.
+          # Opened with STORE_REPO_PAT, not GITHUB_TOKEN: a pull request made with GITHUB_TOKEN
+          # triggers no workflows, so the review and the gate would never run on it.
+          BRANCH="feature/release-store"
+          git clone "https://x-access-token:${STORE_REPO_PAT}@github.com/HarithKavish/store.git" /tmp/store
+          cd /tmp/store
+          git remote set-url origin "https://x-access-token:${STORE_REPO_PAT}@github.com/HarithKavish/store.git"
+          git fetch -q origin development
+          git checkout -q -B "$BRANCH" origin/development
           DEST="apps/store/mobile/android"
           mkdir -p "$DEST"
-
-          # Versioned filename only -- update-latest.yml derives the version
-          # from it, and an unversioned copy would confuse that scan.
-          cp "${{ env.apk }}" "$DEST/store-v${VERSION}.apk"
-
+          # Versioned filename only: the store derives latest.json from the highest version.
+          cp "$APK_SRC" "$DEST/store-v${VERSION}.apk"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "$DEST" mobile/app/build.gradle.kts
-          git diff --staged --quiet \
-            && echo "Nothing to commit" \
-            || git commit -m "release: Store v${VERSION}"
-          git push
+          cp "$GITHUB_WORKSPACE/mobile/app/build.gradle.kts" mobile/app/build.gradle.kts   # the version bump travels in the release pull request
+          git add mobile/app/build.gradle.kts
+          git add "$DEST"
+          git commit -q -m "release: Store v${VERSION}"
+          git push -q --force origin "$BRANCH"
+
+          export GH_TOKEN="$STORE_REPO_PAT"
+          PR=$(gh pr list -R HarithKavish/store --head "$BRANCH" --base development --state open --json number --jq '.[0].number // empty')
+          if [ -z "$PR" ]; then
+            gh pr create -R HarithKavish/store --head "$BRANCH" --base development \
+              --title "release: Store v${VERSION}" \
+              --body "Publishes Store v${VERSION} into the store catalogue. Opened by the release pipeline; it merges itself once the gate passes and reaches store.harithkavish.com when promoted to main."
+            PR=$(gh pr list -R HarithKavish/store --head "$BRANCH" --base development --state open --json number --jq '.[0].number')
+          fi
+          gh pr merge "$PR" -R HarithKavish/store --auto --squash
+          echo "Store release pull request: https://github.com/HarithKavish/store/pull/$PR"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -227,13 +250,6 @@ jobs:
           make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Refresh app manifests
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          gh workflow run update-latest.yml --repo "${{ github.repository }}"
 
       - name: Delete decoded keystore
         if: always()
@@ -250,5 +266,5 @@ jobs:
             echo "| versionCode | ${{ steps.version.outputs.code }} |"
             echo "| Store path | apps/store/mobile/android/store-v${{ steps.version.outputs.version }}.apk |"
             echo ""
-            echo "**Update app manifests** was re-triggered to regenerate latest.json."
+            echo "latest.json is regenerated at deploy, once the release reaches main."
           } >> "$GITHUB_STEP_SUMMARY"
