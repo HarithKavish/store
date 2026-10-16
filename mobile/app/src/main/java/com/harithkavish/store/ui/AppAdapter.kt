@@ -1,6 +1,6 @@
 package com.harithkavish.store.ui
 
-import android.graphics.BitmapFactory
+import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,14 +10,18 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.harithkavish.store.R
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import java.net.URL
 
+/**
+ * What the button and status line should say. UNKNOWN (no manifest yet) for an app that is
+ * installed still opens it, so it is shown as up to date rather than as "Soon".
+ */
+fun AppRowState.displayStatus(): AppStatus =
+    if (status == AppStatus.UNKNOWN && installedVersion != null) AppStatus.UP_TO_DATE else status
+
+/** The app cards. */
 class AppAdapter(
-    private val scope: CoroutineScope,
+    private val icons: IconLoader,
     private val onAction: (AppRowState) -> Unit
 ) : ListAdapter<AppRowState, AppAdapter.ViewHolder>(Diff) {
 
@@ -26,73 +30,78 @@ class AppAdapter(
         override fun areContentsTheSame(old: AppRowState, new: AppRowState) = old == new
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val icon: ImageView = view.findViewById(R.id.appIcon)
         val name: TextView = view.findViewById(R.id.appName)
         val tagline: TextView = view.findViewById(R.id.appTagline)
+        val meta: TextView = view.findViewById(R.id.appMeta)
+        val action: TextView = view.findViewById(R.id.appAction)
+        val category: TextView = view.findViewById(R.id.appCategory)
         val status: TextView = view.findViewById(R.id.appStatus)
-        val action: android.widget.Button = view.findViewById(R.id.appAction)
+        val notes: TextView = view.findViewById(R.id.appNotes)
         var iconJob: Job? = null
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_app, parent, false)
-        return ViewHolder(view)
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_app, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val state = getItem(position)
+        val row = getItem(position)
         val context = holder.itemView.context
+        val status = row.displayStatus()
 
-        holder.name.text = state.app.name
-        holder.tagline.text = state.app.tagline
+        holder.name.text = row.app.name
+        holder.tagline.text = row.app.tagline
+        holder.meta.text = metaLine(row, context)
+        holder.category.text = row.app.category
+        holder.category.visibility = if (row.app.category.isBlank()) View.GONE else View.VISIBLE
 
-        val (statusText, statusColor) = statusFor(state, context)
-        holder.status.text = statusText
-        holder.status.setTextColor(statusColor)
+        ActionButtons.style(holder.action, status)
+        holder.action.setOnClickListener { onAction(row) }
+        holder.itemView.setOnClickListener(if (status == AppStatus.UP_TO_DATE) View.OnClickListener { onAction(row) } else null)
 
-        holder.action.isEnabled = state.status != AppStatus.DOWNLOADING
-        holder.action.text = when (state.status) {
-            AppStatus.NOT_INSTALLED -> context.getString(R.string.action_install)
-            AppStatus.UPDATE_AVAILABLE -> context.getString(R.string.action_update)
-            AppStatus.DOWNLOADING -> context.getString(R.string.downloading, state.manifest?.version ?: "")
-            AppStatus.UP_TO_DATE -> context.getString(R.string.action_open)
-            AppStatus.UNKNOWN -> context.getString(R.string.action_open)
+        // An update edges the card in blue and says what it is from and to, plus what changed.
+        holder.itemView.setBackgroundResource(
+            if (status == AppStatus.UPDATE_AVAILABLE) R.drawable.bg_card_update else R.drawable.bg_card
+        )
+        when (status) {
+            AppStatus.UPDATE_AVAILABLE -> setStatus(holder.status,
+                context.getString(R.string.status_update, row.installedVersion, row.manifest?.version), R.color.update, false)
+            AppStatus.UP_TO_DATE -> setStatus(holder.status,
+                context.getString(R.string.status_installed, row.installedVersion), R.color.installed, true)
+            AppStatus.DOWNLOADING -> setStatus(holder.status,
+                context.getString(R.string.status_downloading, row.manifest?.version ?: ""), R.color.text_muted, false)
+            AppStatus.UNKNOWN -> setStatus(holder.status, context.getString(R.string.status_no_build), R.color.text_faint, false)
+            AppStatus.NOT_INSTALLED -> setStatus(holder.status, "", R.color.text_muted, false)
         }
-        holder.action.setOnClickListener { onAction(state) }
-
-        holder.icon.setImageDrawable(null)
-        holder.iconJob?.cancel()
-        val iconUrl = state.app.iconUrl
-        if (iconUrl != null) {
-            holder.iconJob = scope.launch {
-                val bitmap = withDispatcher { runCatching { BitmapFactory.decodeStream(URL(iconUrl).openStream()) }.getOrNull() }
-                if (bitmap != null && holder.bindingAdapterPosition == position) {
-                    holder.icon.setImageBitmap(bitmap)
-                }
-            }
+        val notes = row.manifest?.releaseNotes
+        if (status == AppStatus.UPDATE_AVAILABLE && !notes.isNullOrBlank()) {
+            holder.notes.text = context.getString(R.string.whats_new, notes)
+            holder.notes.visibility = View.VISIBLE
+        } else {
+            holder.notes.visibility = View.GONE
         }
+
+        holder.iconJob = icons.load(holder.icon, row.app.iconUrl, holder.iconJob)
     }
 
-    private suspend fun <T> withDispatcher(block: () -> T): T = kotlinx.coroutines.withContext(Dispatchers.IO) { block() }
-
-    private fun statusFor(state: AppRowState, context: android.content.Context): Pair<String, Int> = when (state.status) {
-        AppStatus.NOT_INSTALLED -> context.getString(R.string.status_not_installed) to
-            context.getColor(R.color.status_missing)
-        AppStatus.UPDATE_AVAILABLE -> context.getString(
-            R.string.status_update_available,
-            state.installedVersion,
-            state.manifest?.version
-        ) to context.getColor(R.color.status_update)
-        AppStatus.UP_TO_DATE -> context.getString(R.string.status_up_to_date, state.installedVersion) to
-            context.getColor(R.color.status_current)
-        AppStatus.DOWNLOADING -> context.getString(R.string.downloading, state.manifest?.version ?: "") to
-            context.getColor(R.color.status_missing)
-        AppStatus.UNKNOWN -> context.getString(R.string.status_unknown) to
-            context.getColor(R.color.status_missing)
+    private fun setStatus(view: TextView, text: String, color: Int, dot: Boolean) {
+        view.text = text
+        view.setTextColor(view.context.getColor(color))
+        view.setCompoundDrawablesRelativeWithIntrinsicBounds(if (dot) R.drawable.dot_installed else 0, 0, 0, 0)
     }
 
     override fun onViewRecycled(holder: ViewHolder) {
         holder.iconJob?.cancel()
+    }
+
+    companion object {
+        /** "v1.0.0 · 221 KB", or just the size or version if one is missing. */
+        fun metaLine(row: AppRowState, context: android.content.Context): String {
+            val manifest = row.manifest ?: return ""
+            val size = if (manifest.sizeBytes > 0) Formatter.formatShortFileSize(context, manifest.sizeBytes) else ""
+            return if (size.isEmpty()) "v${manifest.version}"
+            else context.getString(R.string.meta_version_size, manifest.version, size)
+        }
     }
 }

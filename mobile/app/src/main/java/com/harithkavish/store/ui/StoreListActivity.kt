@@ -1,11 +1,11 @@
 package com.harithkavish.store.ui
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.harithkavish.store.R
 import com.harithkavish.store.catalog.BuildManifest
@@ -32,53 +32,57 @@ class StoreListActivity : AppCompatActivity() {
     private val catalogRepository = CatalogRepository()
     private lateinit var installedApps: InstalledAppsResolver
     private lateinit var updateManager: UpdateManager
-    private lateinit var adapter: AppAdapter
     private lateinit var updateAllCoordinator: UpdateAllCoordinator
 
-    /** Master rows, before the search filter is applied. */
+    private lateinit var header: HeaderAdapter
+    private lateinit var banner: UpdatesBannerAdapter
+    private lateinit var featured: FeaturedAdapter
+    private lateinit var section: SectionAdapter
+    private lateinit var apps: AppAdapter
+
+    /** Every app, in catalogue order, before the search and the filter. */
     private var rows: List<AppRowState> = emptyList()
     private var query: String = ""
+    private var filter: Filter = Filter.ALL
+    /** "2 of 3…" while Update all runs. */
+    private var updateAllProgress: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityStoreListBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
 
         installedApps = InstalledAppsResolver(packageManager)
         updateManager = UpdateManager(applicationContext)
 
-        adapter = AppAdapter(scope) { row -> onRowAction(row) }
+        val icons = IconLoader(scope)
+        header = HeaderAdapter(
+            onQuery = { query = it; render() },
+            onFilter = { filter = it; render() }
+        )
+        banner = UpdatesBannerAdapter { startUpdateAll() }
+        featured = FeaturedAdapter(icons) { onRowAction(it) }
+        section = SectionAdapter()
+        apps = AppAdapter(icons) { onRowAction(it) }
         binding.appList.layoutManager = LinearLayoutManager(this)
-        binding.appList.adapter = adapter
+        binding.appList.adapter = ConcatAdapter(header, banner, featured, section, apps)
+        binding.appList.itemAnimator?.changeDuration = 120
 
+        binding.swipeRefresh.setColorSchemeColors(getColor(R.color.update))
+        binding.swipeRefresh.setProgressBackgroundColorSchemeColor(getColor(R.color.surface_raised))
         binding.swipeRefresh.setOnRefreshListener { loadCatalog() }
-        binding.searchField.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                query = s?.toString().orEmpty()
-                render()
-            }
-        })
 
         updateAllCoordinator = UpdateAllCoordinator(
             startDownload = { requestUpdate(it) },
             onProgress = { completed, total ->
-                binding.updateAllButton.text = getString(R.string.update_all_progress, completed + 1, total)
+                updateAllProgress = getString(R.string.update_all_progress, completed + 1, total)
+                render()
             },
             onFinished = {
-                binding.updateAllButton.isEnabled = true
-                binding.updateAllButton.text = getString(R.string.update_all)
+                updateAllProgress = null
                 refreshInstalledStatuses()
             }
         )
-        binding.updateAllButton.setOnClickListener {
-            val candidates = rows.filter { it.hasUpdate }
-            if (candidates.isEmpty()) return@setOnClickListener
-            binding.updateAllButton.isEnabled = false
-            updateAllCoordinator.start(candidates)
-        }
 
         scope.launch {
             UpdateEvents.events.collect { event ->
@@ -88,7 +92,7 @@ class StoreListActivity : AppCompatActivity() {
                 if (!event.installerLaunched) {
                     Toast.makeText(
                         this@StoreListActivity,
-                        "${event.update.displayName}: couldn't open the installer",
+                        getString(R.string.installer_failed, event.update.displayName),
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -163,7 +167,6 @@ class StoreListActivity : AppCompatActivity() {
             rows = catalog.apps
                 .filter { it.androidBuild != null }
                 .map { app -> buildRow(app, manifestDeferred[app]?.await()) }
-                .sortedWith(compareByDescending<AppRowState> { it.app.featured }.thenBy { it.app.name })
 
             binding.swipeRefresh.isRefreshing = false
             render()
@@ -182,16 +185,42 @@ class StoreListActivity : AppCompatActivity() {
         app.androidBuild?.packageName?.let { installedApps.installedVersion(it) }
 
     private fun render() {
-        val visible = rows.filter { matchesQuery(it.app) }
-        adapter.submitList(visible)
-        binding.emptyView.visibility = if (rows.isNotEmpty() && visible.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
-        binding.emptyView.text = getString(R.string.empty_search)
+        val updates = rows.filter { it.hasUpdate }
+        header.setState(filter, updates.size)
+        banner.submit(if (filter == Filter.INSTALLED) emptyList() else updates, updateAllProgress)
 
-        if (!updateAllCoordinator.isRunning) {
-            val updateCount = rows.count { it.hasUpdate }
-            binding.updateAllButton.visibility = if (updateCount > 0) android.view.View.VISIBLE else android.view.View.GONE
-            binding.updateAllButton.text = getString(R.string.update_all)
-        }
+        val browsing = filter == Filter.ALL && query.isBlank()
+        // The website's featured app: the catalogue's first featured entry.
+        featured.submit(if (browsing) rows.firstOrNull { it.app.featured } else null)
+
+        // Updates first, so the apps that need you are at the top; otherwise catalogue order.
+        val visible = rows
+            .filter { matchesFilter(it) && matchesQuery(it.app) }
+            .sortedByDescending { it.hasUpdate }
+        apps.submitList(visible)
+        section.submit(
+            if (visible.isEmpty()) null else when (filter) {
+                Filter.ALL -> R.string.section_all
+                Filter.UPDATES -> R.string.section_updates
+                Filter.INSTALLED -> R.string.section_installed
+            }
+        )
+
+        val empty = rows.isNotEmpty() && visible.isEmpty()
+        binding.emptyView.visibility = if (empty) View.VISIBLE else View.GONE
+        binding.emptyView.setText(
+            when {
+                query.isNotBlank() -> R.string.empty_search
+                filter == Filter.UPDATES -> R.string.empty_updates
+                else -> R.string.empty_installed
+            }
+        )
+    }
+
+    private fun matchesFilter(row: AppRowState): Boolean = when (filter) {
+        Filter.ALL -> true
+        Filter.UPDATES -> row.hasUpdate
+        Filter.INSTALLED -> row.installedVersion != null
     }
 
     private fun matchesQuery(app: CatalogApp): Boolean {
@@ -200,8 +229,16 @@ class StoreListActivity : AppCompatActivity() {
         return haystack.contains(query.trim().lowercase())
     }
 
+    private fun startUpdateAll() {
+        val candidates = rows.filter { it.hasUpdate }
+        if (candidates.isEmpty() || updateAllCoordinator.isRunning) return
+        updateAllProgress = getString(R.string.update_all_progress, 1, candidates.size)
+        render()
+        updateAllCoordinator.start(candidates)
+    }
+
     private fun onRowAction(row: AppRowState) {
-        when (row.status) {
+        when (row.displayStatus()) {
             AppStatus.NOT_INSTALLED, AppStatus.UPDATE_AVAILABLE -> requestUpdate(row)
             AppStatus.UP_TO_DATE, AppStatus.UNKNOWN -> openIfInstalled(row)
             AppStatus.DOWNLOADING -> Unit
@@ -222,7 +259,7 @@ class StoreListActivity : AppCompatActivity() {
         val manifest = row.manifest
         val apkUrl = manifest?.apkUrl
         if (manifest == null || apkUrl.isNullOrBlank()) {
-            Toast.makeText(this, "No build available for ${row.app.name} yet", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.no_build_yet, row.app.name), Toast.LENGTH_SHORT).show()
             updateAllCoordinator.onStepHandled(row.app.slug)
             return
         }

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="20dp"
+    android:layout_marginTop="16dp"
+    android:background="@drawable/bg_featured"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingStart="22dp"
+    android:paddingEnd="22dp"
+    android:paddingTop="26dp"
+    android:paddingBottom="22dp">
+
+    <ImageView
+        android:id="@+id/featuredIcon"
+        android:layout_width="112dp"
+        android:layout_height="112dp"
+        android:background="@drawable/bg_icon_large"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        style="@style/Overline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:text="@string/featured_app" />
+
+    <TextView
+        android:id="@+id/featuredName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textColor="@color/text"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        tools:text="Jarvis" />
+
+    <TextView
+        android:id="@+id/featuredTagline"
+        style="@style/StoreLead"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        tools:text="Your personal AI assistant, always in your pocket." />
+
+    <TextView
+        android:id="@+id/featuredAction"
+        style="@style/Pill"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="20dp"
+        android:textSize="15sp"
+        tools:text="Get" />
+
+    <TextView
+        android:id="@+id/featuredMeta"
+        style="@style/AppMeta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        tools:text="Free · v0.0.11 · 63.0 MB" />
+</LinearLayout>
