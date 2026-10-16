@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="20dp"
+    android:layout_marginTop="12dp"
+    android:background="@drawable/bg_banner"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/bannerTitle"
+            style="@style/AppName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="2 updates available" />
+
+        <TextView
+            android:id="@+id/bannerSubtitle"
+            style="@style/AppMeta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            tools:text="Music, Gallery" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/bannerAction"
+        style="@style/Pill"
+        android:layout_width="wrap_content"
+        android:layout_marginStart="12dp"
+        android:background="@drawable/pill_update"
+        android:text="@string/update_all"
+        android:textColor="@color/on_update" />
+</LinearLayout>
