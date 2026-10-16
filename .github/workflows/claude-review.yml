@@ -63,6 +63,20 @@ jobs:
         with:
           fetch-depth: 0
 
+      # This repository publishes APKs, and a release adds one binary file. Android treats the signing
+      # key as the app's identity, so the reviewer has to check it, not take it on trust. Without these
+      # tools it could not, and every release was held (store#31-35, 2026-10-16). They sit on a stable
+      # path so claude_args can allow exactly them; ubuntu-latest ships the Android SDK.
+      - name: APK tools for the reviewer
+        run: |
+          set -euo pipefail
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          for t in apksigner aapt aapt2; do
+            [ -x "$BT/$t" ] && sudo ln -sf "$BT/$t" "/usr/local/bin/$t"
+          done
+          apksigner version
+          aapt2 version || true
+
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -73,7 +87,8 @@ jobs:
           # branch (main), so GitHub's own Closes/Fixes/Resolves keyword handling
           # never fires; issue #61 sat open for hours after its own fix merged
           # because of exactly this, found and filed as issue #65.
-          claude_args: '--allowedTools "Bash(gh pr merge:*),Bash(gh issue close:*)"'
+          # The APK tools only read: verify a signature, print a manifest, hash a file.
+          claude_args: '--allowedTools "Bash(gh pr merge:*),Bash(gh issue close:*),Bash(apksigner verify:*),Bash(aapt dump badging:*),Bash(aapt2 dump badging:*),Bash(sha256sum:*)"'
           prompt: |
             Review this pull request for correctness bugs and post your findings
             as a PR comment. Lead with real defects; do not pad with style nits.
@@ -113,3 +128,19 @@ jobs:
             Closes/Fixes/Resolves #N in a pull request body closes the issue when it
             merges into development -- GitHub does that itself; there is no need to
             close issues by hand any more.
+
+            APKs. An APK under apps/<slug>/mobile/android/ is checked, never taken
+            on trust. For each one this pull request adds, run
+              apksigner verify --print-certs <file>
+              aapt dump badging <file>     (or: aapt2 dump badging <file>)
+            It is correct only if all of these hold:
+              - apksigner verifies it;
+              - the package name equals that app's package_name in catalog.json;
+              - versionName equals the version in the filename, <slug>-vX.Y.Z.apk;
+              - the signer certificate's SHA-256 is the newest earlier APK's in the
+                same folder, if there is one; if this is the app's first APK, it is
+                d779828401bcef563d7d4ab24ce8a202e6cb643e6086fcab39c41addbdd97d21,
+                the ecosystem release key every store app is signed with.
+            Any mismatch, or a debug certificate (CN=Android Debug), is FAIL: a
+            wrongly signed build cannot be undone by reverting. When every check
+            holds, the key has been verified, so a release APK is PASS, not HOLD.
