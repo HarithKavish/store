@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The featured card: the site's hero, a soft teal glow from the top left over a dark card. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/surface" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:centerX="0.15"
+                android:centerY="0.1"
+                android:gradientRadius="420dp"
+                android:startColor="#59123F50"
+                android:endColor="#00000000" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:width="1dp" android:color="@color/hairline" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+</layer-list>

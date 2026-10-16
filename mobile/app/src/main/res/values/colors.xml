@@ -1,18 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="launcher_background">#7A5CFA</color>
-    <color name="launcher_foreground">#F4F1FF</color>
+    <!-- Launcher: black, with the glyph in the same blue as Music's and Gallery's icons. -->
+    <color name="launcher_background">#000000</color>
+    <color name="launcher_foreground">#8AB4F8</color>
 
-    <color name="primary">#7A5CFA</color>
-    <color name="primary_dark">#5B3FE0</color>
+    <!--
+      Full black, with the store website's dark palette on top
+      (harithkavish.com/design-system tokens.css, :root[data-theme='dark']):
+      text #eef2f4, muted #a4afb6, accent #cedfe6 / #081f29, hairline borders
+      at 11% white. The page itself is pure black rather than the site's #0b1014.
+    -->
+    <color name="page">#000000</color>
+    <color name="surface">#0B0F12</color>
+    <color name="surface_raised">#121A1F</color>
+    <color name="hairline">#1CFFFFFF</color>
+    <color name="hairline_strong">#33FFFFFF</color>
 
-    <color name="page_background">#FFFFFF</color>
-    <color name="card_background">#FFFFFF</color>
-    <color name="text_primary">#1B1B1B</color>
-    <color name="text_secondary">#5F5F5F</color>
-    <color name="divider">#E0E0E0</color>
+    <color name="text">#EEF2F4</color>
+    <color name="text_muted">#A4AFB6</color>
+    <color name="text_faint">#6E7A82</color>
 
-    <color name="status_update">#B06F16</color>
-    <color name="status_current">#1E7B34</color>
-    <color name="status_missing">#5F5F5F</color>
+    <!-- The site's primary pill: light fill, dark text. -->
+    <color name="accent">#CEDFE6</color>
+    <color name="on_accent">#081F29</color>
+
+    <!-- Update stands apart from Get: the ecosystem's icon blue. -->
+    <color name="update">#8AB4F8</color>
+    <color name="on_update">#000000</color>
+    <color name="update_soft">#1F8AB4F8</color>
+
+    <color name="installed">#5CC490</color>
+    <color name="ripple">#24FFFFFF</color>
+    <color name="ripple_dark">#26000000</color>
 </resources>
