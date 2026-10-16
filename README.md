@@ -45,6 +45,7 @@ tiles, a spotlight, filters, and the app detail layout.
     {
       "platform": "Android",
       "format": "APK",
+      "package_name": "com.harithkavish.example",
       "manifest": "apps/example/mobile/android/latest.json",
       "requirements": "Android 8.0 or newer",
       "install": ["Step one.", "Step two."]
@@ -55,7 +56,11 @@ tiles, a spotlight, filters, and the app detail layout.
 
 Optional keys: `featured` promotes an app to the spotlight, `price` shows where a
 store usually shows one, and a build may carry a direct `url` instead of a
-`manifest` when nothing generates one for it.
+`manifest` when nothing generates one for it. `package_name` (the Android
+`applicationId`) is what the [Store app](mobile/README.md) reads to check the
+version actually installed on the phone via `PackageManager` — set it on any
+Android build that should get in-app install/update checks from Store, not just
+a website download link.
 
 Status is derived, not declared: an app with a downloadable build reads *Live*,
 one without reads *Coming soon*, so a listing cannot go stale between the entry
@@ -89,6 +94,16 @@ It needs `STORE_REPO_PAT` (write access to this repository) plus the signing
 secrets its own build requires. Every build of an app must be signed with the
 same key — Android identifies an app by its signature, so a new key reads as a
 different app and existing installs can no longer update.
+
+### Publishing Store itself
+
+The [Store app](mobile/README.md) is the one exception: its source lives in
+this repository (`mobile/`), so `publish-store-app.yml` builds, signs, tags a
+release and copies the APK into `apps/store/mobile/android/` all within the
+same checkout — no `STORE_REPO_PAT` or cross-repo clone needed. It still needs
+its own signing secrets, and it explicitly re-triggers **Update app manifests**
+with `gh workflow run` after pushing, since a same-repo push made with the
+workflow's own `GITHUB_TOKEN` does not fire that workflow's `push` trigger.
 
 ## Deploying
 

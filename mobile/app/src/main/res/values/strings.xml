@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Store</string>
+    <string name="search_hint">Search apps</string>
+    <string name="update_all">Update all</string>
+    <string name="action_install">Install</string>
+    <string name="action_update">Update</string>
+    <string name="action_open">Open</string>
+    <string name="status_not_installed">Not installed</string>
+    <string name="status_up_to_date">Up to date · v%1$s</string>
+    <string name="status_update_available">Update available · v%1$s → v%2$s</string>
+    <string name="status_unknown">Status unknown</string>
+    <string name="catalog_load_failed">Could not load the catalogue. Pull to refresh.</string>
+    <string name="empty_search">No apps match that search.</string>
+    <string name="install_permission_title">Allow install permission</string>
+    <string name="install_permission_message">Enable \"Install unknown apps\" for Store, then try again.</string>
+    <string name="open_settings">Open settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="downloading">Downloading v%1$s…</string>
+    <string name="update_all_progress">Updating %1$d of %2$d…</string>
+</resources>

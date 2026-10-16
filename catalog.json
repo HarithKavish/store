@@ -53,6 +53,7 @@
         {
           "platform": "Android",
           "format": "APK",
+          "package_name": "com.harithkavish.jarvis",
           "manifest": "apps/jarvis/mobile/android/latest.json",
           "requirements": "Android 8.0 or newer, roughly 150 MB free space",
           "install": [
@@ -112,6 +113,7 @@
         {
           "platform": "Android",
           "format": "APK",
+          "package_name": "com.reweb.browser",
           "manifest": "apps/reweb/mobile/android/latest.json",
           "requirements": "Android 5.0 (API 21) or newer",
           "install": [
@@ -119,6 +121,236 @@
             "Allow installs from your browser under Settings → Apps → Special access → Install unknown apps.",
             "Open the downloaded file from your notification tray or Downloads folder and tap Install.",
             "Launch ReWeb, then open Diagnostics to see what your device's engine supports."
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "store",
+      "name": "Store",
+      "publisher": "Harith Kavish",
+      "tagline": "Every app in the ecosystem, searchable, installable, and kept up to date.",
+      "category": "Tools",
+      "price": "Free",
+      "featured": true,
+      "icon": "apps/store/icon.png",
+      "accent": "#7A5CFA",
+      "description": "Store is the on-device front for this catalogue: it lists every app the Harith Kavish ecosystem ships, checks what you actually have installed against what's current, and installs or updates any of them — including itself — without a trip back to the browser.",
+      "features": [
+        {
+          "title": "Search the catalogue",
+          "detail": "Find any ecosystem app by name, tagline, or category without leaving the app."
+        },
+        {
+          "title": "Real install status",
+          "detail": "Checks the version actually installed on your phone, not just what you last downloaded."
+        },
+        {
+          "title": "Update everything",
+          "detail": "Update any app — or all of them at once — from one screen."
+        },
+        {
+          "title": "Covers new apps automatically",
+          "detail": "Any app added to this catalogue shows up here with no update to Store itself."
+        },
+        {
+          "title": "Self-updating",
+          "detail": "Checks this store on launch and installs new builds of itself the same way it updates everything else."
+        },
+        {
+          "title": "Open source",
+          "detail": "The full stack is public and self-hostable if you want to run your own."
+        }
+      ],
+      "links": [
+        {
+          "label": "Source code",
+          "href": "https://github.com/HarithKavish/store/tree/main/mobile"
+        }
+      ],
+      "release_repo": "HarithKavish/store",
+      "builds": [
+        {
+          "platform": "Android",
+          "format": "APK",
+          "package_name": "com.harithkavish.store",
+          "manifest": "apps/store/mobile/android/latest.json",
+          "requirements": "Android 8.0 or newer",
+          "install": [
+            "Open this page on your Android device and tap Get.",
+            "Allow installs from your browser under Settings → Apps → Special access → Install unknown apps.",
+            "Open the downloaded file from your notification tray or Downloads folder and tap Install.",
+            "Launch Store to browse, search, and update every app in the ecosystem."
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "music",
+      "name": "Music",
+      "publisher": "Harith Kavish",
+      "tagline": "Your phone's music, album by album, and the newest releases in your languages.",
+      "category": "Music",
+      "price": "Free",
+      "featured": true,
+      "icon": "apps/music/icon.png",
+      "accent": "#8AB4F8",
+      "description": "Music lists the audio on your phone album by album, with artwork borrowed from a shared catalogue when your files carry none. Discover shows the newest albums and singles in the languages you choose, film soundtracks among them, with the people behind them. It plays through the music apps you already have: connect your own Spotify and songs start on your account, with a now-playing bar, a queue and lock-screen controls.",
+      "features": [
+        {
+          "title": "Your library, by album",
+          "detail": "Every album on the phone, as a grid or a list, with folders you can switch off."
+        },
+        {
+          "title": "Discover new releases",
+          "detail": "This week's and this month's albums and singles in your languages, plus independent releases by genre."
+        },
+        {
+          "title": "Plays where you listen",
+          "detail": "Hands each song to Spotify, YouTube Music or Apple Music, whichever is installed."
+        },
+        {
+          "title": "Your own Spotify",
+          "detail": "Connect your account in Settings and songs play outright, with lock-screen controls."
+        },
+        {
+          "title": "Films and the people in them",
+          "detail": "Soundtracks linked to their films, composers, cast and crew."
+        },
+        {
+          "title": "Sings along with Gallery",
+          "detail": "Gallery's 3D face follows the song that is playing."
+        }
+      ],
+      "links": [],
+      "release_repo": "HarithKavish/music",
+      "builds": [
+        {
+          "platform": "Android",
+          "format": "APK",
+          "package_name": "com.harithkavish.music",
+          "manifest": "apps/music/mobile/android/latest.json",
+          "requirements": "Android 10 or newer",
+          "install": [
+            "Open this page on your Android device and tap Get.",
+            "Allow installs from your browser under Settings → Apps → Special access → Install unknown apps.",
+            "Open the downloaded file from your notification tray or Downloads folder and tap Install.",
+            "Launch Music and allow it to read your audio files."
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "gallery",
+      "name": "Gallery",
+      "publisher": "Harith Kavish",
+      "tagline": "Your photos and videos, the people in them, and OneDrive alongside.",
+      "category": "Photography",
+      "price": "Free",
+      "featured": false,
+      "icon": "apps/gallery/icon.png",
+      "accent": "#8AB4F8",
+      "description": "Gallery shows every photo and video on your phone, newest first, with an Albums view of every folder and a storage breakdown on top. The People tab groups photos by who is in them, worked out on the phone with nothing uploaded. Sign in to OneDrive and those photos sit alongside your own. Deletes go to a recycle bin first, so nothing is lost by a slip.",
+      "features": [
+        {
+          "title": "Every photo and video",
+          "detail": "Newest first under a heading per day, with zoom, swipe and video playback."
+        },
+        {
+          "title": "Albums and storage",
+          "detail": "Every folder as a card, with what your images, GIFs and videos take up."
+        },
+        {
+          "title": "People, on the phone",
+          "detail": "Faces are grouped on the device itself. No photo leaves it."
+        },
+        {
+          "title": "OneDrive alongside",
+          "detail": "Your OneDrive photos in the same gallery, marked so you know where each lives."
+        },
+        {
+          "title": "Recycle bins",
+          "detail": "Deleted files wait 30 days in the app's own bin, or OneDrive's, before they go."
+        },
+        {
+          "title": "A face that sings",
+          "detail": "A 3D face that lip-syncs to whatever Music is playing."
+        }
+      ],
+      "links": [],
+      "release_repo": "HarithKavish/gallery",
+      "builds": [
+        {
+          "platform": "Android",
+          "format": "APK",
+          "package_name": "com.harithkavish.gallery",
+          "manifest": "apps/gallery/mobile/android/latest.json",
+          "requirements": "Android 10 or newer, 64-bit (arm64) phone",
+          "install": [
+            "Open this page on your Android device and tap Get.",
+            "Allow installs from your browser under Settings → Apps → Special access → Install unknown apps.",
+            "Open the downloaded file from your notification tray or Downloads folder and tap Install.",
+            "Launch Gallery and allow it to read your photos and videos."
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "keyboard",
+      "name": "Glass Keyboard",
+      "publisher": "Harith Kavish",
+      "tagline": "A QWERTY keyboard you can see straight through.",
+      "category": "Tools",
+      "price": "Free",
+      "featured": false,
+      "icon": "apps/keyboard/icon.png",
+      "accent": "#8FA6C8",
+      "description": "Glass Keyboard has no background of its own: the app behind shows through, and the keys read as panes of glass over whatever you are reading. It suggests and completes words, corrects typos and learns when you overrule it, and has a searchable emoji picker. It has no libraries at all and installs in a few hundred kilobytes. It asks for no permissions and makes no connections, so what you type stays in the app you typed it into.",
+      "features": [
+        {
+          "title": "Transparent by design",
+          "detail": "No panel behind the keys: the app you are using stays visible while you type."
+        },
+        {
+          "title": "Suggestions and autocorrect",
+          "detail": "Three suggestions as you type, and corrections that learn from being undone."
+        },
+        {
+          "title": "Emoji, searchable",
+          "detail": "A picker by category, with search and your recent emoji."
+        },
+        {
+          "title": "Tints to your wallpaper",
+          "detail": "Light or dark glass, chosen from your wallpaper, with an opacity slider."
+        },
+        {
+          "title": "Tiny",
+          "detail": "No AndroidX, no Kotlin, no libraries. The whole app is a few hundred kilobytes."
+        },
+        {
+          "title": "No network, no account",
+          "detail": "No permissions, no connections. Nothing you type leaves the device."
+        }
+      ],
+      "links": [
+        {
+          "label": "Source code",
+          "href": "https://github.com/HarithKavish/keyboard"
+        }
+      ],
+      "release_repo": "HarithKavish/keyboard",
+      "builds": [
+        {
+          "platform": "Android",
+          "format": "APK",
+          "package_name": "com.harithkavish.keyboard",
+          "manifest": "apps/keyboard/mobile/android/latest.json",
+          "requirements": "Android 5.0 or newer",
+          "install": [
+            "Open this page on your Android device and tap Get.",
+            "Allow installs from your browser under Settings → Apps → Special access → Install unknown apps.",
+            "Open the downloaded file from your notification tray or Downloads folder and tap Install.",
+            "Open Glass Keyboard, turn it on under Languages and input, and pick it as your keyboard."
           ]
         }
       ]

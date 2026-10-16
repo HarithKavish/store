@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Downloaded APKs land in the app's own external files dir, never the
+         public Downloads collection — they're implementation detail, not
+         something the user should see the Downloads app fill up with. -->
+    <external-files-path name="updates" path="updates/" />
+</paths>

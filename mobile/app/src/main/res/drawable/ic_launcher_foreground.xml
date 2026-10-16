@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- A simple storefront/bag glyph: a rounded body plus a handle arc. -->
+    <path
+        android:fillColor="@color/launcher_foreground"
+        android:pathData="M34,46 h40 a8,8 0 0 1 8,8 v28 a8,8 0 0 1 -8,8 h-40 a8,8 0 0 1 -8,-8 v-28 a8,8 0 0 1 8,-8 z" />
+    <path
+        android:strokeColor="@color/launcher_foreground"
+        android:strokeWidth="7"
+        android:fillColor="#00000000"
+        android:pathData="M42,46 v-6 a12,12 0 0 1 24,0 v6" />
+</vector>
