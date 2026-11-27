@@ -354,6 +354,61 @@
           ]
         }
       ]
+    },
+    {
+      "slug": "mylife",
+      "name": "My Life",
+      "publisher": "Harith Kavish",
+      "tagline": "Your health, every day, kept for years.",
+      "category": "Health",
+      "price": "Free",
+      "featured": false,
+      "icon": "apps/mylife/icon.png",
+      "accent": "#F2A541",
+      "description": "My Life reads everything Health Connect holds on your phone: sleep, heart rate, steps, blood oxygen and every other kind of data your apps and watch record. It keeps all of it, syncing as new data arrives, so the record grows into years. Its first screen puts what needs a look on top, each with when it happened: a short night, a heart rate that stayed high at rest, an oxygen dip during sleep. Everything else shows as normal. It has no internet access, so your health data stays on your phone unless you export it yourself. It informs; it does not diagnose.",
+      "features": [
+        {
+          "title": "Everything, kept",
+          "detail": "Every record Health Connect holds is stored on the phone, whole, and keeps syncing for years."
+        },
+        {
+          "title": "What needs a look, first",
+          "detail": "Short sleep, a heart rate high at rest, oxygen dips: each with when it happened."
+        },
+        {
+          "title": "Finds your categories",
+          "detail": "Shows the kinds of data your phone actually has, grouped the way Health Connect groups them."
+        },
+        {
+          "title": "Your own baselines",
+          "detail": "Compares each day with your usual, not only with textbook ranges."
+        },
+        {
+          "title": "No network",
+          "detail": "No internet permission. Your health data never leaves the phone by itself."
+        },
+        {
+          "title": "Export any time",
+          "detail": "Save everything as a JSON Lines file wherever you choose."
+        }
+      ],
+      "links": [],
+      "release_repo": "HarithKavish/my_life",
+      "builds": [
+        {
+          "platform": "Android",
+          "format": "APK",
+          "package_name": "com.harithkavish.mylife",
+          "manifest": "apps/mylife/mobile/android/latest.json",
+          "requirements": "Android 9 or newer, with Health Connect",
+          "install": [
+            "Open this page on your Android device and tap Get.",
+            "Allow installs from your browser under Settings → Apps → Special access → Install unknown apps.",
+            "Open the downloaded file from your notification tray or Downloads folder and tap Install.",
+            "Open My Life and allow it to read your data in Health Connect."
+          ]
+        }
+      ]
     }
   ]
 }
